@@ -7,19 +7,24 @@ import (
 )
 
 type boxListSerializer struct {
-	Results models.BoxList `json:"results"`
+	Results Serializable `json:"results"`
 }
 
-// Serializable is an alias for interface{}
-type Serializable interface {
+// SerializeBoxList returns a serialized json as a byte slice for a BoxList
+func SerializeBoxList(boxlistSerializable Serializable) ([]byte, error) {
+	boxlist := boxlistSerializable.(models.BoxList)
+	serialized, err := json.MarshalIndent(boxListSerializer{Results: boxlist}, "", identation)
+
+	if err != nil {
+		return []byte{}, err
+	}
+	return serialized, nil
 }
 
-const identation string = "  "
-
-// SerializeBoxList returns a seriaized json as a byte slice for a BoxList
-func SerializeBoxList(boxesInterface Serializable) ([]byte, error) {
-	boxes := boxesInterface.(models.BoxList)
-	serialized, err := json.MarshalIndent(boxListSerializer{Results: boxes}, "", identation)
+// SerializeBox returns a seriaized json as a byte slice for a Box
+func SerializeBox(boxSerializable Serializable) ([]byte, error) {
+	box := boxSerializable.(models.Box)
+	serialized, err := json.MarshalIndent(box, "", identation)
 
 	if err != nil {
 		return []byte{}, err

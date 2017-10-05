@@ -4,11 +4,19 @@ import (
 	"log"
 
 	"github.com/go-bongo/bongo"
+	"github.com/jenarvaezg/magicbox/utils"
 )
 
 var connection *bongo.Connection
 
-func init() {
+//Model interface is an interface for CRUD objects
+type Model interface {
+	Save() error
+	Delete() error
+	Update(updateMap utils.JSONMap) error
+}
+
+func connectToMongo() *bongo.Connection {
 	config := &bongo.Config{
 		ConnectionString: "localhost",
 		Database:         "bongotest",
@@ -19,4 +27,15 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return connection
+
+}
+
+func setupCollections() {
+	boxCollection = connection.Collection("box")
+}
+
+func init() {
+	connectToMongo()
+	setupCollections()
 }
