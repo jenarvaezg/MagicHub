@@ -36,9 +36,12 @@ func main() {
 	noteRouter.HandleFunc("", handlers.ListNotesHandler).Methods("GET")
 	noteRouter.HandleFunc("", handlers.InsertNoteHandler).Methods("PUT")
 
+	// Middlewares
 	apiCommonMiddleware := negroni.New(
 		middleware.NewRequireJSONMiddleware(),
 	)
+
+	// Order matters, we have to go from most to least specific routes
 	middlewareRouter.PathPrefix(baseRoute + boxRoute + idRoute).Handler(apiCommonMiddleware.With(
 		middleware.NewRequireBoxMiddleware(),
 		negroni.Wrap(boxDetailRouter),
