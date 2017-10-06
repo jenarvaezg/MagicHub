@@ -177,7 +177,10 @@ func (u *User) Update(updateMap utils.JSONMap) error {
 		if err = u.validatePassword(); err != nil {
 			return err
 		}
-		passwordBytes, _ := passwordRaw.MarshalJSON()
+		passwordBytes, err := passwordRaw.MarshalJSON()
+		if err != nil {
+			return err
+		}
 		u.SetPassword(string(passwordBytes))
 	}
 

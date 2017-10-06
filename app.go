@@ -16,6 +16,7 @@ const (
 	boxRoute   string = "/box"
 	notesRoute string = "/notes"
 	userRoute  string = "/user"
+	tokenRoute string = "/token"
 	idRoute    string = "/{id:[0-9a-f]+}"
 	port       string = "8000"
 )
@@ -36,6 +37,11 @@ func init() {
 func main() {
 	middlewareRouter := mux.NewRouter()
 	router := mux.NewRouter() //two routers are neccesary due to negroni
+	// Token routes
+	tokenRouter := router.PathPrefix(tokenRoute).Subrouter()
+	tokenRouter.HandleFunc("", handlers.TokenRequestHandler).Methods("POST")
+
+	// API routes
 	apiRouter := router.PathPrefix(baseRoute).Subrouter()
 	// Box router
 	boxRouter := apiRouter.PathPrefix(boxRoute).Subrouter()
@@ -60,7 +66,6 @@ func main() {
 	userDetailRouter.HandleFunc("", handlers.UserDetailHandler).Methods("GET")
 	userDetailRouter.HandleFunc("", handlers.UserDeleteHandler).Methods("DELETE")
 	userDetailRouter.HandleFunc("", handlers.UserPatchHandler).Methods("PATCH")
-
 	// Middlewares
 	// Order matters, we have to go from most to least specific routes
 
@@ -74,6 +79,10 @@ func main() {
 	))
 	middlewareRouter.PathPrefix(baseRoute).Handler(apiCommonMiddleware.With(
 		negroni.Wrap(apiRouter),
+	))
+	middlewareRouter.PathPrefix(tokenRoute).Handler(negroni.New(
+		negroni.NewLogger(),
+		negroni.Wrap(tokenRouter),
 	))
 
 	log.Panic(http.ListenAndServe(":"+port, middlewareRouter))
