@@ -58,6 +58,7 @@ func main() {
 	// User detail routes
 	userDetailRouter := userRouter.PathPrefix(idRoute).Subrouter()
 	userDetailRouter.HandleFunc("", handlers.UserDetailHandler).Methods("GET")
+	userDetailRouter.HandleFunc("", handlers.UserDeleteHandler).Methods("DELETE")
 
 	// Middlewares
 	// Order matters, we have to go from most to least specific routes

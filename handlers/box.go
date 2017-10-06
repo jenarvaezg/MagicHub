@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/jenarvaezg/magicbox/models"
 	"github.com/jenarvaezg/magicbox/utils"
 )
@@ -39,17 +38,10 @@ func BoxDetailHandler(w http.ResponseWriter, r *http.Request) {
 
 // BoxDeleteHandler handles DELETE requests for box deletion
 func BoxDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	box, err := models.GetBoxByID(id)
-
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
-		return
-	}
+	box := getBox(r)
 
 	if err := box.Delete(); err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	utils.ResponseNoContent(w)

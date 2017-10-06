@@ -38,3 +38,14 @@ func UserDetailHandler(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseJSON(w, user, false)
 
 }
+
+// UserDeleteHandler handles GET requests for user detail
+func UserDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	user := getUser(r)
+	if err := user.Delete(); err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	utils.ResponseNoContent(w)
+
+}

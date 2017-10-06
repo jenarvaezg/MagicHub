@@ -133,7 +133,7 @@ func (u *User) validateUsername() error {
 	if u.Username == "" {
 		return errors.New("Field username is required")
 	}
-	if _, err := GetUserByEmail(u.Username); err == nil { //ensure unique email
+	if _, err := GetUserByUsername(u.Username); err == nil { //ensure unique email
 		return errors.New("Username already exists")
 	}
 	return nil
@@ -153,12 +153,12 @@ func getPBKDF2(passphrase []byte) []byte {
 	return pbkdf2.Key([]byte(passphrase), salt, iterations, keylen, sha512.New)
 }
 
-/*
 // Delete deletes a box instance from database
-func (b *Box) Delete() error {
-	return boxCollection.DeleteDocument(b)
+func (u *User) Delete() error {
+	return userCollection.DeleteDocument(u)
 }
 
+/*
 // Update updates a box instance from database
 func (b *Box) Update(updateMap utils.JSONMap) error {
 	updateMap = utils.RemoveForbiddenFields(updateMap)
