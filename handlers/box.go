@@ -33,12 +33,8 @@ func CreateBoxHandler(w http.ResponseWriter, r *http.Request) {
 
 // BoxDetailHandler handles GET requests for box detail
 func BoxDetailHandler(w http.ResponseWriter, r *http.Request) {
-	box, err := getBox(r)
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
-	} else {
-		utils.ResponseJSON(w, box, false)
-	}
+	box := getBox(r)
+	utils.ResponseJSON(w, box, false)
 }
 
 // BoxDeleteHandler handles DELETE requests for box deletion
@@ -61,11 +57,8 @@ func BoxDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 // BoxPatchHandler handles PATCH requests for box updating
 func BoxPatchHandler(w http.ResponseWriter, r *http.Request) {
-	box, err := getBox(r)
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
-		return
-	}
+	box := getBox(r)
+
 	jsonMap, err := utils.GetJSONMap(r.Body)
 	if err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)

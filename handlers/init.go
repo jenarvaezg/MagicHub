@@ -22,8 +22,7 @@ func badRequestHandler() http.Handler {
 	})
 }
 
-func getBox(r *http.Request) (models.Box, error) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	return models.GetBoxByID(id)
+func getBox(r *http.Request) models.Box {
+	ctx := r.Context()
+	return ctx.Value(utils.ContextKeyBox).(models.Box)
 }

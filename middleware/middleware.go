@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -59,6 +60,8 @@ func (l *RequireBoxMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request,
 		utils.ResponseError(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	log.Println(box)
+
+	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyBox, box))
+
 	next(w, r)
 }

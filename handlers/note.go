@@ -10,10 +10,7 @@ import (
 
 // ListNotesHandler handles GET requests for a box's notes
 func ListNotesHandler(w http.ResponseWriter, r *http.Request) {
-	box, err := getBox(r)
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
-	}
+	box := getBox(r)
 
 	notes := box.GetNotes()
 	utils.ResponseJSON(w, notes, true)
@@ -21,10 +18,7 @@ func ListNotesHandler(w http.ResponseWriter, r *http.Request) {
 
 // InsertNoteHandler handles PUT requests for inserting a note in a box
 func InsertNoteHandler(w http.ResponseWriter, r *http.Request) {
-	box, err := getBox(r)
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
-	}
+	box := getBox(r)
 
 	note := models.NewNote()
 	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
@@ -36,4 +30,11 @@ func InsertNoteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	box.AddNote(note)
 
+}
+
+//DeleteNotesHandler handles DELETE requests for deletion of all the notes in the box
+func DeleteNotesHandler(w http.ResponseWriter, r *http.Request) {
+	box := getBox(r)
+	box.DeleteNotes()
+	utils.ResponseNoContent(w)
 }

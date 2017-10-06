@@ -12,10 +12,16 @@ import (
 )
 
 const (
-	baseRoute string = "/api/v1"
-	boxRoute  string = "/box"
-	idRoute   string = "/{id:[0-9a-f]+}"
-	port      string = "8000"
+	baseRoute  string = "/api/v1"
+	boxRoute   string = "/box"
+	notesRoute string = "/notes"
+	idRoute    string = "/{id:[0-9a-f]+}"
+	port       string = "8000"
+)
+
+var apiCommonMiddleware = negroni.New(
+	negroni.NewLogger(),
+	middleware.NewRequireJSONMiddleware(),
 )
 
 func main() {
@@ -32,15 +38,12 @@ func main() {
 	boxDetailRouter.HandleFunc("", handlers.BoxDeleteHandler).Methods("DELETE")
 	boxDetailRouter.HandleFunc("", handlers.BoxPatchHandler).Methods("PATCH")
 	// Note routes
-	noteRouter := boxRouter.PathPrefix("/notes").Subrouter()
+	noteRouter := boxDetailRouter.PathPrefix("/notes").Subrouter()
 	noteRouter.HandleFunc("", handlers.ListNotesHandler).Methods("GET")
-	noteRouter.HandleFunc("", handlers.InsertNoteHandler).Methods("PUT")
+	noteRouter.HandleFunc("", handlers.InsertNoteHandler).Methods("POST")
+	noteRouter.HandleFunc("", handlers.DeleteNotesHandler).Methods("DELETE")
 
 	// Middlewares
-	apiCommonMiddleware := negroni.New(
-		middleware.NewRequireJSONMiddleware(),
-	)
-
 	// Order matters, we have to go from most to least specific routes
 	middlewareRouter.PathPrefix(baseRoute + boxRoute + idRoute).Handler(apiCommonMiddleware.With(
 		middleware.NewRequireBoxMiddleware(),

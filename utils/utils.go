@@ -13,6 +13,12 @@ type listSerializer struct {
 	Results interface{} `json:"results"`
 }
 
+// ContextKey is a string used for key indexing at for context
+type ContextKey string
+
+//ContextKeyBox is a key used for indexing a box in a context
+var ContextKeyBox = ContextKey("box")
+
 //RemoveForbiddenFields removes id created_at and modified at from JSONMap
 func RemoveForbiddenFields(jm JSONMap) JSONMap {
 	delete(jm, "_id")

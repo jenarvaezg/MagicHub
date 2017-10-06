@@ -90,6 +90,12 @@ func (b *Box) GetNotes() Notes {
 	return b.Notes
 }
 
+// DeleteNotes deletes all the notes inside a box
+func (b *Box) DeleteNotes() {
+	b.Notes = make(Notes, 0)
+	b.Save()
+}
+
 // GetBoxByID returns a box searching by id
 func GetBoxByID(id string) (box Box, err error) {
 	if !bson.IsObjectIdHex(id) {
