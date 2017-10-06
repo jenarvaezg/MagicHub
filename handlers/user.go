@@ -23,6 +23,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	user.SetPassword(*user.Password)
 
 	if err := user.Save(); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
@@ -48,4 +49,20 @@ func UserDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.ResponseNoContent(w)
 
+}
+
+// UserPatchHandler handles PATCH requests for user updating
+func UserPatchHandler(w http.ResponseWriter, r *http.Request) {
+	user := getUser(r)
+
+	jsonMap, err := utils.GetJSONMap(r.Body)
+	if err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+	}
+
+	if err := user.Update(jsonMap); err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	utils.ResponseNoContent(w)
 }

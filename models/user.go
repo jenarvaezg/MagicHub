@@ -3,12 +3,14 @@ package models
 import (
 	"crypto/sha512"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"regexp"
 
 	"github.com/go-bongo/bongo"
+	"github.com/jenarvaezg/magicbox/utils"
 	"golang.org/x/crypto/pbkdf2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -83,7 +85,6 @@ func (u *User) Save() error {
 		return err
 	}
 	u.Status = userActive
-	u.encryptPassword()
 	return userCollection.Save(u)
 }
 
@@ -104,6 +105,7 @@ func (u *User) validate() error {
 }
 
 func (u *User) validatePassword() error {
+	log.Println("VALIDATING!", u.Password, *u.Password)
 	if *u.Password == "" {
 		return errors.New("Field password is required")
 	}
@@ -123,7 +125,7 @@ func (u *User) validateEmail() error {
 		return errors.New("Invalid email format")
 	}
 
-	if _, err := GetUserByEmail(u.Email); err == nil { //ensure unique email
+	if otherU, err := GetUserByEmail(u.Email); err == nil && u.GetId() != otherU.GetId() { //ensure unique email
 		return errors.New("Email already exists")
 	}
 	return nil
@@ -133,15 +135,15 @@ func (u *User) validateUsername() error {
 	if u.Username == "" {
 		return errors.New("Field username is required")
 	}
-	if _, err := GetUserByUsername(u.Username); err == nil { //ensure unique email
+	if otherU, err := GetUserByUsername(u.Username); err == nil && u.GetId() != otherU.GetId() { //ensure unique email
 		return errors.New("Username already exists")
 	}
 	return nil
 }
 
-func (u *User) encryptPassword() {
-
-	dk := getPBKDF2([]byte(*u.Password))
+// SetPassword sets the privided password to the user, but using PBKDF2 cypher
+func (u *User) SetPassword(password string) {
+	dk := getPBKDF2([]byte(password))
 	*u.Password = base64.StdEncoding.EncodeToString(dk)
 }
 
@@ -158,22 +160,29 @@ func (u *User) Delete() error {
 	return userCollection.DeleteDocument(u)
 }
 
-/*
 // Update updates a box instance from database
-func (b *Box) Update(updateMap utils.JSONMap) error {
-	updateMap = utils.RemoveForbiddenFields(updateMap)
+func (u *User) Update(updateMap utils.JSONMap) error {
+
 	updateBytes, err := json.Marshal(updateMap)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(updateBytes, b)
+	err = json.Unmarshal(updateBytes, u)
 	if err != nil {
 		return err
 	}
 
-	return b.Save()
-}*/
+	if passwordRaw, ok := updateMap["password"]; ok {
+		if err = u.validatePassword(); err != nil {
+			return err
+		}
+		passwordBytes, _ := passwordRaw.MarshalJSON()
+		u.SetPassword(string(passwordBytes))
+	}
+
+	return u.Save()
+}
 
 // UserList is a list of User Documents
 type UserList = []User
