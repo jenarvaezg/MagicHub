@@ -13,12 +13,6 @@ import (
 
 var boxCollection *bongo.Collection
 
-var boxUpdateableFields = make(map[string]bool)
-
-func boxInit() {
-	boxUpdateableFields["Name"] = true
-}
-
 // Box is a document which holds information about a box
 type Box struct {
 	bongo.DocumentBase `bson:",inline"`
@@ -28,9 +22,6 @@ type Box struct {
 
 // BoxList is a list of Box Documents
 type BoxList = []Box
-
-// Notes is a list of Note embedded documents
-type Notes = []Note
 
 // NewBox returns a pointer to a new instance of Box
 func NewBox() *Box {

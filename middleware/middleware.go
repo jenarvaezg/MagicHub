@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -36,7 +35,6 @@ func (l *RequireJSONMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request
 	methodNeedsJSON := func(method string) bool {
 		return method == "POST" || method == "PUT"
 	}
-	log.Println("JSON")
 	if methodNeedsJSON(r.Method) && r.Header.Get("content-type") != "application/json" {
 		utils.ResponseError(w, "Expected content-type to be application/json", http.StatusBadRequest)
 	} else {

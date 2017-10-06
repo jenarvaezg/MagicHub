@@ -33,6 +33,7 @@ func connectToMongo() *bongo.Connection {
 
 func setupCollections() {
 	boxCollection = connection.Collection("box")
+	userCollection = connection.Collection("user")
 }
 
 func init() {

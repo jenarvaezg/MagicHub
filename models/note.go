@@ -9,6 +9,9 @@ type Note struct {
 	Detail string `json:"detail"`
 }
 
+// Notes is a list of Note embedded documents
+type Notes = []Note
+
 //NewNote returns a Note
 func NewNote() Note {
 	return Note{}
