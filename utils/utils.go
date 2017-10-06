@@ -20,11 +20,10 @@ type ContextKey string
 var ContextKeyBox = ContextKey("box")
 
 //RemoveForbiddenFields removes id created_at and modified at from JSONMap
-func RemoveForbiddenFields(jm JSONMap) JSONMap {
-	delete(jm, "_id")
-	delete(jm, "_created_at")
-	delete(jm, "_updated_at")
-	return jm
+func RemoveForbiddenFields(jm *JSONMap) {
+	delete(*jm, "_id")
+	delete(*jm, "_created_at")
+	delete(*jm, "_updated_at")
 }
 
 func getJSONEncoder(w http.ResponseWriter) *json.Encoder {
@@ -59,6 +58,7 @@ func ResponseJSON(w http.ResponseWriter, object interface{}, many bool) { //seri
 // GetJSONMap returns a JSONMap which is a map of string to *json.RawMessage
 func GetJSONMap(r io.Reader) (objmap JSONMap, err error) {
 	err = json.NewDecoder(r).Decode(&objmap)
+	RemoveForbiddenFields(&objmap)
 	return objmap, err
 }
 

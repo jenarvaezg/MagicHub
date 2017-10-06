@@ -1,12 +1,15 @@
 package models
 
 import (
+	"crypto/sha512"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
 	"regexp"
 
 	"github.com/go-bongo/bongo"
+	"golang.org/x/crypto/pbkdf2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -24,7 +27,7 @@ const (
 type User struct {
 	bongo.DocumentBase `bson:",inline"`
 	Username           string     `json:"username"`
-	Password           string     `json:"-" bson:"password"`
+	Password           *string    `json:"password,omitempty" bson:"password,omitempty"`
 	Email              string     `json:"email"`
 	FirstName          string     `json:"firstName"`
 	LastName           string     `json:"lastName"`
@@ -41,7 +44,6 @@ func NewUser() User {
 func GetUserByEmail(email string) (User, error) {
 	user := User{}
 	err := userCollection.FindOne(bson.M{"email": email}, &user)
-	log.Println(user, err)
 	return user, err
 
 }
@@ -55,6 +57,23 @@ func GetUserByUsername(username string) (User, error) {
 
 }
 
+// GetUserByID return an user from database if an user with the specified ID exists. Password is cleared
+func GetUserByID(id string) (user User, err error) {
+	if !bson.IsObjectIdHex(id) {
+		return user, fmt.Errorf("%s is not a valid id}", id)
+	}
+
+	err = userCollection.FindById(bson.ObjectIdHex(id), &user)
+	if err != nil {
+		if dnfError, ok := err.(*bongo.DocumentNotFoundError); ok {
+			return user, dnfError
+		}
+		log.Panic("WTF", err.Error())
+	}
+	user.Password = nil
+	return
+}
+
 func (u *User) String() string {
 	return fmt.Sprintf("User: %q id %s email %q", u.Username, u.Id, u.Email)
 }
@@ -65,6 +84,7 @@ func (u *User) Save() error {
 		return err
 	}
 	u.Status = userActive
+	u.encryptPassword()
 	return userCollection.Save(u)
 }
 
@@ -85,10 +105,10 @@ func (u *User) validate() error {
 }
 
 func (u *User) validatePassword() error {
-	if u.Password == "" {
+	if *u.Password == "" {
 		return errors.New("Field password is required")
 	}
-	if len(u.Password) < 8 {
+	if len(*u.Password) < 8 {
 		return errors.New("Password must have at least 8 characters")
 	}
 
@@ -118,6 +138,20 @@ func (u *User) validateUsername() error {
 		return errors.New("Username already exists")
 	}
 	return nil
+}
+
+func (u *User) encryptPassword() {
+
+	dk := getPBKDF2([]byte(*u.Password))
+	*u.Password = base64.StdEncoding.EncodeToString(dk)
+}
+
+func getPBKDF2(passphrase []byte) []byte {
+	salt := []byte("MagicBox")
+	iterations := 4096
+	keylen := 64
+
+	return pbkdf2.Key([]byte(passphrase), salt, iterations, keylen, sha512.New)
 }
 
 /*
@@ -156,6 +190,7 @@ func ListUsers() (users UserList) {
 
 	user := User{}
 	for results.Next(&user) {
+		user.Password = nil
 		users = append(users, user)
 	}
 

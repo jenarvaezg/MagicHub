@@ -16,6 +16,7 @@ func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// CreateUserHandler handles POST requests for user creation
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := models.NewUser()
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {

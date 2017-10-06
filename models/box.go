@@ -56,7 +56,6 @@ func (b *Box) Delete() error {
 
 // Update updates a box instance from database
 func (b *Box) Update(updateMap utils.JSONMap) error {
-	updateMap = utils.RemoveForbiddenFields(updateMap)
 	updateBytes, err := json.Marshal(updateMap)
 	if err != nil {
 		return err
