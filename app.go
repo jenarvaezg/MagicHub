@@ -55,9 +55,17 @@ func main() {
 	userRouter := apiRouter.PathPrefix(userRoute).Subrouter()
 	userRouter.HandleFunc("", handlers.ListUsersHandler).Methods("GET")
 	userRouter.HandleFunc("", handlers.CreateUserHandler).Methods("POST")
+	// User detail routes
+	userDetailRouter := userRouter.PathPrefix(idRoute).Subrouter()
+	userDetailRouter.HandleFunc("", handlers.UserDetailHandler).Methods("GET")
 
 	// Middlewares
 	// Order matters, we have to go from most to least specific routes
+
+	middlewareRouter.PathPrefix(baseRoute + userRoute + idRoute).Handler(apiCommonMiddleware.With(
+		middleware.NewRequireUserMiddleware(),
+		negroni.Wrap(userDetailRouter),
+	))
 	middlewareRouter.PathPrefix(baseRoute + boxRoute + idRoute).Handler(apiCommonMiddleware.With(
 		middleware.NewRequireBoxMiddleware(),
 		negroni.Wrap(boxDetailRouter),

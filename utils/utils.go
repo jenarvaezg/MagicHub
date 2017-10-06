@@ -19,6 +19,9 @@ type ContextKey string
 //ContextKeyBox is a key used for indexing a box in a context
 var ContextKeyBox = ContextKey("box")
 
+//ContextKeyUser is a key used for indexing a user in a context
+var ContextKeyUser = ContextKey("user")
+
 //RemoveForbiddenFields removes id created_at and modified at from JSONMap
 func RemoveForbiddenFields(jm *JSONMap) {
 	delete(*jm, "_id")

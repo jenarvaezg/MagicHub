@@ -57,7 +57,7 @@ func GetUserByUsername(username string) (User, error) {
 
 }
 
-// GetUserByID return an user from database if an user with the specified ID exists. Password is cleared
+// GetUserByID return an user from database if an user with the specified ID exists.
 func GetUserByID(id string) (user User, err error) {
 	if !bson.IsObjectIdHex(id) {
 		return user, fmt.Errorf("%s is not a valid id}", id)
@@ -70,7 +70,6 @@ func GetUserByID(id string) (user User, err error) {
 		}
 		log.Panic("WTF", err.Error())
 	}
-	user.Password = nil
 	return
 }
 

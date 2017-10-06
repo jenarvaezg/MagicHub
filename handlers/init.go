@@ -26,3 +26,8 @@ func getBox(r *http.Request) models.Box {
 	ctx := r.Context()
 	return ctx.Value(utils.ContextKeyBox).(models.Box)
 }
+
+func getUser(r *http.Request) models.User {
+	ctx := r.Context()
+	return ctx.Value(utils.ContextKeyUser).(models.User)
+}

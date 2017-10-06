@@ -30,3 +30,11 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseCreated(w)
 	}
 }
+
+// UserDetailHandler handles GET requests for user detail
+func UserDetailHandler(w http.ResponseWriter, r *http.Request) {
+	user := getUser(r)
+	user.Password = nil
+	utils.ResponseJSON(w, user, false)
+
+}
