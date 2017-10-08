@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/go-bongo/bongo"
 	"github.com/gorilla/mux"
 	"github.com/jenarvaezg/magicbox/models"
 	"github.com/jenarvaezg/magicbox/utils"
@@ -35,4 +37,10 @@ func getUser(r *http.Request) models.User {
 func getCurrentUser(r *http.Request) models.User {
 	ctx := r.Context()
 	return ctx.Value(utils.ContextKeyCurrentUser).(models.User)
+}
+
+func setLocationHeader(w http.ResponseWriter, r *http.Request, document bongo.Document) {
+	url, _ := mux.CurrentRoute(r).URL()
+	id := document.GetId().Hex()
+	w.Header().Set("Locaton", fmt.Sprintf("%s/%s", url.RequestURI(), id))
 }

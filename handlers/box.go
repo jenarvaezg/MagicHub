@@ -22,10 +22,10 @@ func CreateBoxHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	if err := box.Save(); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 	} else {
+		setLocationHeader(w, r, box)
 		utils.ResponseCreated(w)
 	}
 }

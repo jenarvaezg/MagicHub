@@ -61,7 +61,7 @@ func main() {
 	// User routes
 	userRouter := apiRouter.PathPrefix(userRoute).Subrouter()
 	userRouter.HandleFunc("", handlers.ListUsersHandler).Methods("GET")
-	userRouter.HandleFunc("", handlers.CreateUserHandler).Methods("POST")
+	userRouter.HandleFunc("", handlers.CreateUserHandler).Methods("POST").Name("create-user-url")
 	// User detail routes
 	userDetailRouter := userRouter.PathPrefix(idRoute).Subrouter()
 	userDetailRouter.HandleFunc("", handlers.UserDetailHandler).Methods("GET")

@@ -23,11 +23,16 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if user.Password == nil {
+		utils.ResponseError(w, "Missing password field", http.StatusBadRequest)
+		return
+	}
 	user.SetPassword(*user.Password)
 
 	if err := user.Save(); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 	} else {
+		setLocationHeader(w, r, &user)
 		utils.ResponseCreated(w)
 	}
 }

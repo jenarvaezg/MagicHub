@@ -132,10 +132,18 @@ func getTokenClaims(tokenString string) (*auth.TokenClaims, error) {
 	return claims, err
 }
 
+func isCreateUserRequest(r *http.Request) bool {
+	return r.Method == "POST" && r.URL.RequestURI() == "/api/v1/user"
+}
+
 /*
 UserFromJWTMiddleware's handler, extracts JWT from auth header, validates JWT and inserts user in the request context
 */
 func (l *UserFromJWTMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if isCreateUserRequest(r) {
+		next(w, r)
+		return
+	}
 	token, err := extractJWTFromHeader(r.Header.Get("Authorization"))
 	if err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusUnauthorized)

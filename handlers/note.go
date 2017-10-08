@@ -28,7 +28,7 @@ func InsertNoteHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	note.From = currentUser.Username
+	note.From = currentUser.GetId().Hex()
 	box.AddNote(note)
 	utils.ResponseCreated(w)
 
