@@ -2,9 +2,13 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"strings"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	"github.com/jenarvaezg/magicbox/auth"
 	"github.com/jenarvaezg/magicbox/models"
 	"github.com/jenarvaezg/magicbox/utils"
 )
@@ -21,6 +25,10 @@ type RequireBoxMiddleware struct {
 type RequireUserMiddleware struct {
 }
 
+//RequireUserMiddleware is a middleware that varifies a JWT in the Authorization header and sets the user in the conext
+type UserFromJWTMiddleware struct {
+}
+
 // NewRequireJSONMiddleware returns a RequireJSONMiddleware
 func NewRequireJSONMiddleware() *RequireJSONMiddleware {
 	return &RequireJSONMiddleware{}
@@ -34,6 +42,11 @@ func NewRequireBoxMiddleware() *RequireBoxMiddleware {
 // NewRequireUserMiddleware returns a RequireUserMiddleware
 func NewRequireUserMiddleware() *RequireUserMiddleware {
 	return &RequireUserMiddleware{}
+}
+
+// NewUserFromJWTMiddleware returns a RequireUserMiddleware
+func NewUserFromJWTMiddleware() *UserFromJWTMiddleware {
+	return &UserFromJWTMiddleware{}
 }
 
 /*
@@ -92,5 +105,48 @@ func (l *RequireUserMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyUser, user))
 
+	next(w, r)
+}
+
+func extractJWTFromHeader(authHeader string) (string, error) {
+	if authHeader == "" {
+		return "", errors.New("Missing Authorization header") // No error, just no token
+	}
+
+	authHeaderParts := strings.Split(authHeader, " ")
+	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != "bearer" {
+		return "", errors.New("Authorization header format must be Bearer {token}")
+	}
+
+	return authHeaderParts[1], nil
+}
+
+func getTokenClaims(tokenString string) (*auth.TokenClaims, error) {
+	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		return []byte("AllYourBase"), nil
+	}
+
+	claims := &auth.TokenClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, keyFunc)
+	claims, _ = token.Claims.(*auth.TokenClaims)
+	return claims, err
+}
+
+/*
+UserFromJWTMiddleware's handler, extracts JWT from auth header, validates JWT and inserts user in the request context
+*/
+func (l *UserFromJWTMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	token, err := extractJWTFromHeader(r.Header.Get("Authorization"))
+	if err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	claims, err := getTokenClaims(token)
+	if err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyCurrentUser, claims.User))
 	next(w, r)
 }

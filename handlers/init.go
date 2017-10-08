@@ -31,3 +31,8 @@ func getUser(r *http.Request) models.User {
 	ctx := r.Context()
 	return ctx.Value(utils.ContextKeyUser).(models.User)
 }
+
+func getCurrentUser(r *http.Request) models.User {
+	ctx := r.Context()
+	return ctx.Value(utils.ContextKeyCurrentUser).(models.User)
+}

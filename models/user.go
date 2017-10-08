@@ -105,7 +105,6 @@ func (u *User) validate() error {
 }
 
 func (u *User) validatePassword() error {
-	log.Println("VALIDATING!", u.Password, *u.Password)
 	if *u.Password == "" {
 		return errors.New("Field password is required")
 	}
@@ -181,10 +180,16 @@ func (u *User) Update(updateMap utils.JSONMap) error {
 		if err != nil {
 			return err
 		}
-		u.SetPassword(string(passwordBytes))
+		u.SetPassword(string(passwordBytes[1 : len(passwordBytes)-1])) // remove beginning and end quotes
 	}
 
 	return u.Save()
+}
+
+// ChallengePassword returns whether a provided password equals the user's passowrd
+func (u *User) ChallengePassword(password string) bool {
+	ciphered := getPBKDF2([]byte(password))
+	return base64.StdEncoding.EncodeToString(ciphered) == *u.Password
 }
 
 // UserList is a list of User Documents

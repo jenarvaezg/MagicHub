@@ -16,7 +16,7 @@ const (
 	boxRoute   string = "/box"
 	notesRoute string = "/notes"
 	userRoute  string = "/user"
-	tokenRoute string = "/token"
+	loginRoute string = "/login"
 	idRoute    string = "/{id:[0-9a-f]+}"
 	port       string = "8000"
 )
@@ -27,6 +27,7 @@ func getAPICommonMiddleware() *negroni.Negroni {
 	return negroni.New(
 		negroni.NewLogger(),
 		middleware.NewRequireJSONMiddleware(),
+		middleware.NewUserFromJWTMiddleware(),
 	)
 }
 
@@ -38,8 +39,8 @@ func main() {
 	middlewareRouter := mux.NewRouter()
 	router := mux.NewRouter() //two routers are neccesary due to negroni
 	// Token routes
-	tokenRouter := router.PathPrefix(tokenRoute).Subrouter()
-	tokenRouter.HandleFunc("", handlers.TokenRequestHandler).Methods("POST")
+	tokenRouter := router.PathPrefix(loginRoute).Subrouter()
+	tokenRouter.HandleFunc("", handlers.LoginRequestHandler).Methods("POST")
 
 	// API routes
 	apiRouter := router.PathPrefix(baseRoute).Subrouter()
@@ -80,7 +81,7 @@ func main() {
 	middlewareRouter.PathPrefix(baseRoute).Handler(apiCommonMiddleware.With(
 		negroni.Wrap(apiRouter),
 	))
-	middlewareRouter.PathPrefix(tokenRoute).Handler(negroni.New(
+	middlewareRouter.PathPrefix(loginRoute).Handler(negroni.New(
 		negroni.NewLogger(),
 		negroni.Wrap(tokenRouter),
 	))

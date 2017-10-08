@@ -19,9 +19,6 @@ func NewNote() Note {
 
 // Validate returns an error if any field is missing
 func (n *Note) Validate() error {
-	if n.From == "" {
-		return errors.New("Missing from field")
-	}
 	if n.Title == "" {
 		return errors.New("Missing title field")
 	}

@@ -22,6 +22,9 @@ var ContextKeyBox = ContextKey("box")
 //ContextKeyUser is a key used for indexing a user in a context
 var ContextKeyUser = ContextKey("user")
 
+//ContextKeyCurrentUser is a key used for indexing a user in a context
+var ContextKeyCurrentUser = ContextKey("current-user")
+
 //RemoveForbiddenFields removes id created_at and modified at from JSONMap
 func RemoveForbiddenFields(jm *JSONMap) {
 	delete(*jm, "_id")
@@ -45,6 +48,8 @@ func ResponseError(w http.ResponseWriter, message string, code int) {
 // ResponseJSON serializes a object and sends the result to w
 func ResponseJSON(w http.ResponseWriter, object interface{}, many bool) { //serializer serializerFn, object interface{}) {
 	var err error
+
+	w.Header().Set("Content-Type", "application/json")
 	encoder := getJSONEncoder(w)
 	if many {
 		err = encoder.Encode(listSerializer{Results: object})
@@ -53,8 +58,6 @@ func ResponseJSON(w http.ResponseWriter, object interface{}, many bool) { //seri
 	}
 	if err != nil {
 		ResponseError(w, err.Error(), http.StatusBadRequest)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
 	}
 }
 

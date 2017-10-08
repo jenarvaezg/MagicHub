@@ -19,7 +19,7 @@ func ListNotesHandler(w http.ResponseWriter, r *http.Request) {
 // InsertNoteHandler handles PUT requests for inserting a note in a box
 func InsertNoteHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
-
+	currentUser := getCurrentUser(r)
 	note := models.NewNote()
 	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
@@ -28,7 +28,9 @@ func InsertNoteHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	note.From = currentUser.Username
 	box.AddNote(note)
+	utils.ResponseCreated(w)
 
 }
 
