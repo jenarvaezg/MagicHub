@@ -25,7 +25,7 @@ type RequireBoxMiddleware struct {
 type RequireUserMiddleware struct {
 }
 
-//RequireUserMiddleware is a middleware that varifies a JWT in the Authorization header and sets the user in the conext
+//UserFromJWTMiddleware is a middleware that varifies a JWT in the Authorization header and sets the user in the conext
 type UserFromJWTMiddleware struct {
 }
 

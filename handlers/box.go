@@ -11,17 +11,18 @@ import (
 // ListBoxesHandler handles GET requests for box listing
 func ListBoxesHandler(w http.ResponseWriter, r *http.Request) {
 	//TODO filtering
-	boxes := models.ListBoxes()
-	utils.ResponseJSON(w, boxes, true)
+	utils.ResponseJSON(w, models.GetBoxListResponse(), true)
 }
 
 // CreateBoxHandler handles POST requests for box creation
 func CreateBoxHandler(w http.ResponseWriter, r *http.Request) {
-	box := models.NewBox()
-	if err := json.NewDecoder(r.Body).Decode(&box); err != nil {
+	var boxRequest models.BoxRequest
+	if err := json.NewDecoder(r.Body).Decode(&boxRequest); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
+
 	}
+	box := models.NewBox(boxRequest)
 	if err := box.Save(); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 	} else {
@@ -33,7 +34,8 @@ func CreateBoxHandler(w http.ResponseWriter, r *http.Request) {
 // BoxDetailHandler handles GET requests for box detail
 func BoxDetailHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
-	utils.ResponseJSON(w, box, false)
+	box.RefreshStatus()
+	utils.ResponseJSON(w, box.GetResponse(), false)
 }
 
 // BoxDeleteHandler handles DELETE requests for box deletion

@@ -12,8 +12,12 @@ import (
 func ListNotesHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
 
-	notes := box.GetNotes()
-	utils.ResponseJSON(w, notes, true)
+	notes, err := box.GetNotes()
+	if err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusConflict) //TODO check
+	} else {
+		utils.ResponseJSON(w, notes, true)
+	}
 }
 
 // InsertNoteHandler handles PUT requests for inserting a note in a box
