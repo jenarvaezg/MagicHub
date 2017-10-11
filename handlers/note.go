@@ -2,19 +2,26 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/jenarvaezg/magicbox/models"
 	"github.com/jenarvaezg/magicbox/utils"
 )
 
+func getNoteRequest(r *http.Request) (models.NoteRequest, error) {
+	var noteRequest models.NoteRequest
+	err := json.NewDecoder(r.Body).Decode(&noteRequest)
+	return noteRequest, err
+}
+
 // ListNotesHandler handles GET requests for a box's notes
 func ListNotesHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
 
-	notes, err := box.GetNotes()
+	notes, err := models.GetNoteListResponse(box)
 	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusConflict) //TODO check
+		utils.ResponseError(w, err.Error(), http.StatusConflict)
 	} else {
 		utils.ResponseJSON(w, notes, true)
 	}
@@ -24,18 +31,24 @@ func ListNotesHandler(w http.ResponseWriter, r *http.Request) {
 func InsertNoteHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
 	currentUser := getCurrentUser(r)
-	note := models.NewNote()
-	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
-		return
-	} else if err := note.Validate(); err != nil {
+	noteRequest, err := getNoteRequest(r)
+	if err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	note.From = currentUser.GetId().Hex()
-	box.AddNote(note)
-	utils.ResponseCreated(w)
 
+	note := models.NewNote(noteRequest, currentUser)
+
+	if err := note.Validate(); err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := box.AddNote(*note); err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	log.Println(box)
+	utils.ResponseCreated(w)
 }
 
 //DeleteNotesHandler handles DELETE requests for deletion of all the notes in the box

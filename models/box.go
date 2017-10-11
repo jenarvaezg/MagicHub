@@ -1,14 +1,12 @@
 package models
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/go-bongo/bongo"
-	"github.com/jenarvaezg/magicbox/utils"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -32,7 +30,7 @@ type Box struct {
 	OpenDate           time.Time       `bson:"openDate"`
 }
 
-//BoxResponse is a struct that resembles a response for box listing
+//BoxResponse is a struct that resembles a response for box detail and listing
 type BoxResponse struct {
 	Name          string        `json:"name"`
 	Status        BoxStatus     `json:"status"`
@@ -59,7 +57,6 @@ func NewBox(request BoxRequest) *Box {
 	box.Notes = make(Notes, 0)
 	box.Name = request.Name
 	box.OpenDate = request.OpenDate
-	//TODO parse date from json or change date format
 	return box
 }
 
@@ -97,16 +94,9 @@ func (b *Box) Delete() error {
 }
 
 // Update updates a box instance from database
-func (b *Box) Update(updateMap utils.JSONMap) error {
-	updateBytes, err := json.Marshal(updateMap)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(updateBytes, b)
-	if err != nil {
-		return err
-	}
+func (b *Box) Update(request BoxRequest) error {
+	b.Name = request.Name
+	b.OpenDate = request.OpenDate
 
 	return b.Save()
 }
@@ -122,8 +112,9 @@ func (b *Box) AddNote(note Note) error {
 
 // GetNotes returns a list of notes from a Box instance
 func (b *Box) GetNotes() (Notes, error) {
+	log.Println(b.Status)
 	if b.Status != boxStatusOpen {
-		return Notes{}, errors.New("Can't get ntoes from a closed box")
+		return Notes{}, errors.New("Can't get notes from a closed box")
 	}
 	return b.Notes, nil
 }

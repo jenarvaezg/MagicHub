@@ -2,12 +2,8 @@ package utils
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 )
-
-// JSONMap is an alias to map[string]*json.RawMessage
-type JSONMap = map[string]*json.RawMessage
 
 type listSerializer struct {
 	Results interface{} `json:"results"`
@@ -26,11 +22,6 @@ var ContextKeyUser = ContextKey("user")
 var ContextKeyCurrentUser = ContextKey("current-user")
 
 //RemoveForbiddenFields removes id created_at and modified at from JSONMap
-func RemoveForbiddenFields(jm *JSONMap) {
-	delete(*jm, "_id")
-	delete(*jm, "_created_at")
-	delete(*jm, "_updated_at")
-}
 
 func getJSONEncoder(w http.ResponseWriter) *json.Encoder {
 	encoder := json.NewEncoder(w)
@@ -59,13 +50,6 @@ func ResponseJSON(w http.ResponseWriter, object interface{}, many bool) { //seri
 	if err != nil {
 		ResponseError(w, err.Error(), http.StatusBadRequest)
 	}
-}
-
-// GetJSONMap returns a JSONMap which is a map of string to *json.RawMessage
-func GetJSONMap(r io.Reader) (objmap JSONMap, err error) {
-	err = json.NewDecoder(r).Decode(&objmap)
-	RemoveForbiddenFields(&objmap)
-	return objmap, err
 }
 
 // ResponseCreated sets header to 201 Created

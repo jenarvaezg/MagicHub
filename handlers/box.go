@@ -8,6 +8,12 @@ import (
 	"github.com/jenarvaezg/magicbox/utils"
 )
 
+func getBoxRequest(r *http.Request) (models.BoxRequest, error) {
+	var boxRequest models.BoxRequest
+	err := json.NewDecoder(r.Body).Decode(&boxRequest)
+	return boxRequest, err
+}
+
 // ListBoxesHandler handles GET requests for box listing
 func ListBoxesHandler(w http.ResponseWriter, r *http.Request) {
 	//TODO filtering
@@ -16,12 +22,12 @@ func ListBoxesHandler(w http.ResponseWriter, r *http.Request) {
 
 // CreateBoxHandler handles POST requests for box creation
 func CreateBoxHandler(w http.ResponseWriter, r *http.Request) {
-	var boxRequest models.BoxRequest
-	if err := json.NewDecoder(r.Body).Decode(&boxRequest); err != nil {
+	boxRequest, err := getBoxRequest(r)
+	if err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
-
 	}
+
 	box := models.NewBox(boxRequest)
 	if err := box.Save(); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
@@ -34,7 +40,6 @@ func CreateBoxHandler(w http.ResponseWriter, r *http.Request) {
 // BoxDetailHandler handles GET requests for box detail
 func BoxDetailHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
-	box.RefreshStatus()
 	utils.ResponseJSON(w, box.GetResponse(), false)
 }
 
@@ -52,13 +57,13 @@ func BoxDeleteHandler(w http.ResponseWriter, r *http.Request) {
 // BoxPatchHandler handles PATCH requests for box updating
 func BoxPatchHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
-
-	jsonMap, err := utils.GetJSONMap(r.Body)
+	boxRequest, err := getBoxRequest(r)
 	if err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	if err := box.Update(jsonMap); err != nil {
+	if err := box.Update(boxRequest); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusNotFound)
 		return
 	}

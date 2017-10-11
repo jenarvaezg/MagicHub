@@ -4,17 +4,12 @@ import (
 	"log"
 
 	"github.com/go-bongo/bongo"
-	"github.com/jenarvaezg/magicbox/utils"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var connection *bongo.Connection
 
-//Model interface is an interface for CRUD objects
-type Model interface {
-	Save() error
-	Delete() error
-	Update(updateMap utils.JSONMap) error
-}
+var emptyUser = bson.ObjectId(0)
 
 func connectToMongo() *bongo.Connection {
 	config := &bongo.Config{

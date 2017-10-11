@@ -16,7 +16,7 @@ const (
 
 // TokenClaims is a struct for the JWT claims
 type TokenClaims struct {
-	User models.User `json:"user"`
+	User models.UserResponse `json:"user"`
 	jwt.StandardClaims
 }
 
@@ -24,8 +24,7 @@ var mySigningKey = []byte("AllYourBase") //TODO use real key
 
 func getJWT(user models.User) (string, error) {
 
-	user.Password = nil
-	claims := TokenClaims{user, jwt.StandardClaims{
+	claims := TokenClaims{user.GetResponse(), jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 		Issuer:    "magicbox.auh",
 		IssuedAt:  time.Now().Unix(),

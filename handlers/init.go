@@ -24,9 +24,11 @@ func badRequestHandler() http.Handler {
 	})
 }
 
-func getBox(r *http.Request) models.Box {
+func getBox(r *http.Request) *models.Box {
 	ctx := r.Context()
-	return ctx.Value(utils.ContextKeyBox).(models.Box)
+	box := ctx.Value(utils.ContextKeyBox).(models.Box)
+	box.RefreshStatus()
+	return &box
 }
 
 func getUser(r *http.Request) models.User {

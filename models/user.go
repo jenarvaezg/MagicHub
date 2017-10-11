@@ -3,14 +3,12 @@ package models
 import (
 	"crypto/sha512"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"regexp"
 
 	"github.com/go-bongo/bongo"
-	"github.com/jenarvaezg/magicbox/utils"
 	"golang.org/x/crypto/pbkdf2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -28,18 +26,66 @@ const (
 // User is a document which holds information about a user
 type User struct {
 	bongo.DocumentBase `bson:",inline"`
-	Username           string     `json:"username"`
-	Password           *string    `json:"password,omitempty" bson:"password,omitempty"`
-	Email              string     `json:"email"`
-	FirstName          string     `json:"firstName"`
-	LastName           string     `json:"lastName"`
-	Status             userStatus `json:"-" bson:"status"`
+	Username           string     `bson:"username"`
+	Password           string     `bson:"password"`
+	Email              string     `bson:"email"`
+	FirstName          string     `bson:"firstName"`
+	LastName           string     `bson:"lastName"`
+	Status             userStatus `bson:"status"`
+}
+
+// UserRequest is a struct that resembles a request performed by users to edit or create a user
+type UserRequest struct {
+	Username  string  `json:"username"`
+	Password  *string `json:"password,omitempty"`
+	Email     string  `json:"email"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+}
+
+//UserResponse is a struct that resembles a response for user detail and listing
+type UserResponse struct {
+	Username  string        `json:"username"`
+	Email     string        `json:"email"`
+	FirstName string        `json:"firstName"`
+	LastName  string        `json:"lastName"`
+	Status    userStatus    `json:"status"`
+	ID        bson.ObjectId `json:"id"`
+}
+
+// UserList is a list of User Documents
+type UserList = []User
+
+// UserListResponse is a list of User Documents
+type UserListResponse = []UserResponse
+
+func validatePassword(password string) error {
+	if password == "" {
+		return errors.New("Password is required")
+	}
+	if len(password) < 8 {
+		return errors.New("Password must have at least 8 characters")
+	}
+
+	return nil
 }
 
 // NewUser returns an User instance, with status set to inactive
-func NewUser() User {
-	user := User{Status: userInactive}
-	return user
+func NewUser(request UserRequest) (*User, error) {
+	user := &User{
+		Status:    userInactive,
+		Username:  request.Username,
+		Email:     request.Email,
+		FirstName: request.FirstName,
+		LastName:  request.LastName,
+	}
+	if request.Password != nil {
+		if err := validatePassword(*request.Password); err != nil {
+			return user, err
+		}
+		user.SetPassword(*request.Password)
+	}
+	return user, nil
 }
 
 // GetUserByEmail return an user from database if the email exists
@@ -98,20 +144,9 @@ func (u *User) validate() error {
 	if err := u.validateEmail(); err != nil {
 		return err
 	}
-	if err := u.validatePassword(); err != nil {
+	if err := validatePassword(u.Password); err != nil {
 		return err
 	}
-	return nil
-}
-
-func (u *User) validatePassword() error {
-	if *u.Password == "" {
-		return errors.New("Field password is required")
-	}
-	if len(*u.Password) < 8 {
-		return errors.New("Password must have at least 8 characters")
-	}
-
 	return nil
 }
 
@@ -143,7 +178,7 @@ func (u *User) validateUsername() error {
 // SetPassword sets the privided password to the user, but using PBKDF2 cypher
 func (u *User) SetPassword(password string) {
 	dk := getPBKDF2([]byte(password))
-	*u.Password = base64.StdEncoding.EncodeToString(dk)
+	u.Password = base64.StdEncoding.EncodeToString(dk)
 }
 
 func getPBKDF2(passphrase []byte) []byte {
@@ -159,41 +194,43 @@ func (u *User) Delete() error {
 	return userCollection.DeleteDocument(u)
 }
 
-// Update updates a box instance from database
-func (u *User) Update(updateMap utils.JSONMap) error {
-
-	updateBytes, err := json.Marshal(updateMap)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(updateBytes, u)
-	if err != nil {
-		return err
-	}
-
-	if passwordRaw, ok := updateMap["password"]; ok {
-		if err = u.validatePassword(); err != nil {
+// Update updates a User instance from database
+func (u *User) Update(request UserRequest) error {
+	u.Username = request.Username
+	u.Email = request.Email
+	u.FirstName = request.FirstName
+	u.LastName = request.LastName
+	log.Println(request.Password)
+	log.Println(*request.Password)
+	log.Println(u.Password)
+	if request.Password != nil {
+		if err := validatePassword(*request.Password); err != nil {
 			return err
 		}
-		passwordBytes, err := passwordRaw.MarshalJSON()
-		if err != nil {
-			return err
-		}
-		u.SetPassword(string(passwordBytes[1 : len(passwordBytes)-1])) // remove beginning and end quotes
+		u.SetPassword(*request.Password)
 	}
 
 	return u.Save()
 }
 
+// GetResponse returns a BoxResponse
+func (u *User) GetResponse() UserResponse {
+	response := UserResponse{
+		Username:  u.Username,
+		Status:    u.Status,
+		Email:     u.Email,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		ID:        u.GetId(),
+	}
+	return response
+}
+
 // ChallengePassword returns whether a provided password equals the user's passowrd
 func (u *User) ChallengePassword(password string) bool {
 	ciphered := getPBKDF2([]byte(password))
-	return base64.StdEncoding.EncodeToString(ciphered) == *u.Password
+	return base64.StdEncoding.EncodeToString(ciphered) == u.Password
 }
-
-// UserList is a list of User Documents
-type UserList = []User
 
 func newUserList() UserList {
 	return make([]User, 0)
@@ -206,9 +243,18 @@ func ListUsers() (users UserList) {
 
 	user := User{}
 	for results.Next(&user) {
-		user.Password = nil
 		users = append(users, user)
 	}
 
 	return
+}
+
+//GetUserListResponse returns a UserListResponse which represent a the users in the database
+func GetUserListResponse() UserListResponse {
+	users := ListUsers()
+	responses := make(UserListResponse, len(users))
+	for i, user := range users {
+		responses[i] = user.GetResponse()
+	}
+	return responses
 }
