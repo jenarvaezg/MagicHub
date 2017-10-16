@@ -17,6 +17,7 @@ const (
 	notesRoute string = "/notes"
 	userRoute  string = "/user"
 	loginRoute string = "/login"
+	register   string = "/register"
 	idRoute    string = "/{id:[0-9a-f]+}"
 	port       string = "8000"
 )
@@ -53,6 +54,10 @@ func main() {
 	boxDetailRouter.HandleFunc("", handlers.BoxDetailHandler).Methods("GET")
 	boxDetailRouter.HandleFunc("", handlers.BoxDeleteHandler).Methods("DELETE")
 	boxDetailRouter.HandleFunc("", handlers.BoxPatchHandler).Methods("PATCH")
+	//Box register routes
+	boxRegisterRouter := boxDetailRouter.PathPrefix(register).Subrouter()
+	boxRegisterRouter.HandleFunc("", handlers.RegisterInBoxHandler).Methods("POST")
+	boxRegisterRouter.HandleFunc("", handlers.RemoveFromBoxHandler).Methods("DELETE")
 	// Note routes
 	noteRouter := boxDetailRouter.PathPrefix(notesRoute).Subrouter()
 	noteRouter.HandleFunc("", handlers.ListNotesHandler).Methods("GET")

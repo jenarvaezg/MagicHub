@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -28,6 +29,7 @@ type Box struct {
 	Users              []bson.ObjectId `bson:"users"`
 	Status             BoxStatus       `bson:"status"`
 	OpenDate           time.Time       `bson:"openDate"`
+	Passphrase         string          `bson:"passphrase"`
 }
 
 //BoxResponse is a struct that resembles a response for box detail and listing
@@ -37,12 +39,19 @@ type BoxResponse struct {
 	OpenDate      time.Time     `json:"openDate"`
 	NumberOfNotes int           `json:"numberOfNotes"`
 	ID            bson.ObjectId `json:"id"`
+	Registered    bool          `json:"registered"`
 }
 
 // BoxRequest is a struct that resembles a request performed by users to edit or create a box instance
 type BoxRequest struct {
-	Name     string    `json:"name"`
-	OpenDate time.Time `json:"openDate"`
+	Name       string    `json:"name"`
+	OpenDate   time.Time `json:"openDate"`
+	Passphrase *string   `json:"passphrase,omitempty"`
+}
+
+// BoxRegisterRequest is a struct that resembles a request performed by users to register into a box
+type BoxRegisterRequest struct {
+	Passphrase string `json:"passphrase"`
 }
 
 // BoxList is a list of Box Documents
@@ -57,6 +66,9 @@ func NewBox(request BoxRequest) *Box {
 	box.Notes = make(Notes, 0)
 	box.Name = request.Name
 	box.OpenDate = request.OpenDate
+	if request.Passphrase != nil {
+		box.setPassphrase(*request.Passphrase)
+	}
 	return box
 }
 
@@ -97,7 +109,9 @@ func (b *Box) Delete() error {
 func (b *Box) Update(request BoxRequest) error {
 	b.Name = request.Name
 	b.OpenDate = request.OpenDate
-
+	if request.Passphrase != nil {
+		b.setPassphrase(*request.Passphrase)
+	}
 	return b.Save()
 }
 
@@ -126,15 +140,57 @@ func (b *Box) DeleteNotes() {
 }
 
 // GetResponse returns a BoxResponse
-func (b *Box) GetResponse() BoxResponse {
+func (b *Box) GetResponse(user User) BoxResponse {
 	response := BoxResponse{
 		Name:          b.Name,
 		Status:        b.Status,
 		OpenDate:      b.OpenDate,
 		NumberOfNotes: len(b.Notes),
 		ID:            b.GetId(),
+		Registered:    b.IsUserRegistered(user),
 	}
 	return response
+}
+
+// AddUser adds a user to the box, if user is already in box, returns an error if user already in box
+func (b *Box) AddUser(user User) error {
+	if !b.IsUserRegistered(user) {
+		return errors.New("User is already registered in this box")
+	}
+	b.Users = append(b.Users, user.GetId())
+	return nil
+}
+
+// RemoveUser removes a user from the box, return an error if user is not in box
+func (b *Box) RemoveUser(user User) error {
+	for i, boxUser := range b.Users {
+		if boxUser == user.GetId() {
+			b.Users = append(b.Users[:i], b.Users[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("User not registered in this box")
+}
+
+// IsUserRegistered returns whether and user is registered in the box
+func (b *Box) IsUserRegistered(user User) bool {
+	for _, boxUser := range b.Users {
+		if boxUser == user.GetId() {
+			return true
+		}
+	}
+	return false
+}
+
+// ChallengePassword returns whether a provided passphrase equals the box's passphrase
+func (b *Box) ChallengePassword(passphrase string) bool {
+	ciphered := getPBKDF2([]byte(passphrase))
+	return base64.StdEncoding.EncodeToString(ciphered) == b.Passphrase
+}
+
+func (b *Box) setPassphrase(passphrase string) {
+	dk := getPBKDF2([]byte(passphrase))
+	b.Passphrase = base64.StdEncoding.EncodeToString(dk)
 }
 
 // GetBoxByID returns a box searching by id
@@ -171,12 +227,12 @@ func ListBoxes() (boxes BoxList) {
 }
 
 //GetBoxListResponse returns a BoxListResponse which represent a the boxes in the database
-func GetBoxListResponse() BoxListResponse {
+func GetBoxListResponse(user User) BoxListResponse {
 	boxes := ListBoxes()
 	responses := make(BoxListResponse, len(boxes))
 	for i, box := range boxes {
 		box.RefreshStatus()
-		responses[i] = box.GetResponse()
+		responses[i] = box.GetResponse(user)
 	}
 	return responses
 }
