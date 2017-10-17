@@ -6,6 +6,7 @@ import (
 
 	"github.com/jenarvaezg/magicbox/handlers"
 	"github.com/jenarvaezg/magicbox/middleware"
+	"github.com/rs/cors"
 	"github.com/urfave/negroni"
 
 	"github.com/gorilla/mux"
@@ -25,8 +26,16 @@ const (
 var apiCommonMiddleware *negroni.Negroni
 
 func getAPICommonMiddleware() *negroni.Negroni {
+	optionsMiddleware := cors.New(cors.Options{
+		AllowedMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
+		AllowedHeaders:     []string{"*"},
+		AllowCredentials:   true,
+		OptionsPassthrough: false,
+		Debug:              true,
+	})
 	return negroni.New(
 		negroni.NewLogger(),
+		optionsMiddleware,
 		middleware.NewRequireJSONMiddleware(),
 		middleware.NewUserFromJWTMiddleware(),
 	)
