@@ -13,8 +13,8 @@ var emptyUser = bson.ObjectId(0)
 
 func connectToMongo() *bongo.Connection {
 	config := &bongo.Config{
-		ConnectionString: "localhost",
-		Database:         "bongotest",
+		ConnectionString: "mongo",
+		Database:         "magicbox",
 	}
 	var err error
 	connection, err = bongo.Connect(config)
