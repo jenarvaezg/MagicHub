@@ -29,10 +29,10 @@ type NoteResponse struct {
 }
 
 // NoteListResponse is a list of NoteResponse
-type NoteListResponse = []NoteResponse
+type NoteListResponse []NoteResponse
 
 // Notes is a list of Note embedded documents
-type Notes = []Note
+type Notes []Note
 
 //NewNote returns a Note
 func NewNote(request NoteRequest, user User) *Note {

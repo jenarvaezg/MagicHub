@@ -54,10 +54,10 @@ type UserResponse struct {
 }
 
 // UserList is a list of User Documents
-type UserList = []User
+type UserList []User
 
 // UserListResponse is a list of User Documents
-type UserListResponse = []UserResponse
+type UserListResponse []UserResponse
 
 func validatePassword(password string) error {
 	if password == "" {
