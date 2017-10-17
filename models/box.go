@@ -55,10 +55,10 @@ type BoxRegisterRequest struct {
 }
 
 // BoxList is a list of Box Documents
-type BoxList = []Box
+type BoxList []Box
 
 // BoxListResponse is a list of BoxResponse
-type BoxListResponse = []BoxResponse
+type BoxListResponse []BoxResponse
 
 // NewBox returns a pointer to a new instance of Box
 func NewBox(request BoxRequest) *Box {
