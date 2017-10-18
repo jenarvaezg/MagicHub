@@ -155,6 +155,12 @@ func (l *UserFromJWTMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyCurrentUser, claims.User))
+	user, err := models.GetUserByID(claims.User.ID.Hex())
+	if err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyCurrentUser, user))
 	next(w, r)
 }
