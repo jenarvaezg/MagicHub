@@ -144,10 +144,7 @@ func (u *User) validate() error {
 	if err := u.validateEmail(); err != nil {
 		return err
 	}
-	if err := validatePassword(u.Password); err != nil {
-		return err
-	}
-	return nil
+	return validatePassword(u.Password)
 }
 
 func (u *User) validateEmail() error {
