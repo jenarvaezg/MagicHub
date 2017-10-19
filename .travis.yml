@@ -10,6 +10,12 @@ go:
   - 1.9
   - tip
 
+# Skip the install step. Don't `go get` dependencies. Only build with the
+# code in vendor/
+go_import_path: github.com/jenarvaezg/magicbox
+
+install: true
+
 matrix:
   # It's ok if our code fails on unstable development versions of Go.
   allow_failures:
