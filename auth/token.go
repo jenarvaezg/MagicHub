@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	grantTypePassword          = "password"
-	grantTypeClientCredentials = "client_credentials"
+	grantTypePassword = "password"
 )
 
 // TokenClaims is a struct for the JWT claims

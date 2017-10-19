@@ -4,17 +4,14 @@ import (
 	"log"
 
 	"github.com/go-bongo/bongo"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var connection *bongo.Connection
 
-var emptyUser = bson.ObjectId(0)
-
 func connectToMongo() *bongo.Connection {
 	config := &bongo.Config{
-		ConnectionString: "mongo",
-		Database:         "magicbox",
+		ConnectionString: "localhost",
+		Database:         "bongotest",
 	}
 	var err error
 	connection, err = bongo.Connect(config)

@@ -7,7 +7,7 @@ services:
       - "27017:27017"
   magicbox:
     build: .
-    container_name: magicbox
+    container_name: jenarvaezg/magicbox
     ports:
       - "8000:8000"
     links:
