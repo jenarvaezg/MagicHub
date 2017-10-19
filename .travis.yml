@@ -8,11 +8,12 @@ language: go
 # are allowed to fail on Go tip.
 go:
   - 1.9
-  - tip 
+  - tip
 
 # Skip the install step. Don't `go get` dependencies. Only build with the
 # code in vendor/
-install: true
+install:
+  - go get github.com/jenarvaezg/magicbox
 
 matrix:
   # It's ok if our code fails on unstable development versions of Go.
@@ -28,7 +29,7 @@ notifications:
 
 # Anything in before_script that returns a nonzero exit code will
 # flunk the build and immediately stop. It's sorta like having
-# set -e enabled in bash. 
+# set -e enabled in bash.
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
   - go get github.com/golang/lint/golint                        # Linter
