@@ -5,6 +5,8 @@ go:
 
 go_import_path: github.com/jenarvaezg/magicbox
 
+go_build_args: -a -installsuffix cgo -o magicbox .
+
 install: true
 
 # Email me the results of the test runs.
@@ -34,7 +36,7 @@ script:
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    docker build -t jenarvaezg/magicbox:$MAGICBOX_VERSION .
+    ./build_image.sh
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push jenarvaezg/magicbox:$MAGICBOX_VERSION;
     fi

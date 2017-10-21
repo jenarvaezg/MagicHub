@@ -1,2 +1,3 @@
-FROM golang:onbuild
-EXPOSE 8000
+FROM scratch
+ADD magicbox /
+CMD ["/magicbox"]
