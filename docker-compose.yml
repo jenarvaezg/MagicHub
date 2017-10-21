@@ -6,8 +6,8 @@ services:
     ports:
       - "27017:27017"
   magicbox:
-    build: .
-    container_name: jenarvaezg/magicbox:latest
+    image: jenarvaezg/magicbox:0.1.1
+    container_name: magicbox
     environment:
       - MONGO_URL="mongo"
       - MONGO_DATABASE="magicbox"
