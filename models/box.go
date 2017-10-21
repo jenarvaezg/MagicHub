@@ -40,6 +40,7 @@ type BoxResponse struct {
 	NumberOfNotes int           `json:"numberOfNotes"`
 	ID            bson.ObjectId `json:"id"`
 	Registered    bool          `json:"registered"`
+	HasPassphrase bool          `json:"hasPassphrase"`
 }
 
 // BoxRequest is a struct that resembles a request performed by users to edit or create a box instance
@@ -126,7 +127,6 @@ func (b *Box) AddNote(note Note) error {
 
 // GetNotes returns a list of notes from a Box instance
 func (b *Box) GetNotes() (Notes, error) {
-	log.Println(b.Status)
 	if b.Status != boxStatusOpen {
 		return Notes{}, errors.New("Can't get notes from a closed box")
 	}
@@ -148,6 +148,7 @@ func (b *Box) GetResponse(user User) BoxResponse {
 		NumberOfNotes: len(b.Notes),
 		ID:            b.GetId(),
 		Registered:    b.IsUserRegistered(user),
+		HasPassphrase: b.Passphrase != "",
 	}
 	return response
 }
@@ -184,6 +185,9 @@ func (b *Box) IsUserRegistered(user User) bool {
 
 // ChallengePassword returns whether a provided passphrase equals the box's passphrase
 func (b *Box) ChallengePassword(passphrase string) bool {
+	if b.Passphrase == "" {
+		return true
+	}
 	ciphered := getPBKDF2([]byte(passphrase))
 	return base64.StdEncoding.EncodeToString(ciphered) == b.Passphrase
 }
