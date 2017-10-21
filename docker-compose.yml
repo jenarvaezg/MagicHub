@@ -3,6 +3,9 @@ services:
   mongo:
     image: mongo
     container_name: mongo
+    env:
+      MONGO_URL: "mongo"
+      MONGO_DATABASE: "magicbox"
     ports:
       - "27017:27017"
   magicbox:
