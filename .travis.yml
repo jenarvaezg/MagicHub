@@ -36,5 +36,5 @@ after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
     docker build -t jenarvaezg/magicbox:$MAGICBOX_VERSION .
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push jenarvaezg/magicbox:$VERSION;
+    docker push jenarvaezg/magicbox:$MAGICBOX_VERSION;
     fi
