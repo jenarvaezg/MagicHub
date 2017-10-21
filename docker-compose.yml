@@ -3,14 +3,15 @@ services:
   mongo:
     image: mongo
     container_name: mongo
+    hostname: mongo
     ports:
       - "27017:27017"
   magicbox:
     image: jenarvaezg/magicbox:0.1.1
     container_name: magicbox
     environment:
-      - MONGO_URL="mongo"
-      - MONGO_DATABASE="magicbox"
+      - MONGO_URL=mongo
+      - MONGO_DATABASE=magicbox
     ports:
       - "8000:8000"
     links:
