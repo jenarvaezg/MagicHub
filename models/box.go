@@ -155,7 +155,7 @@ func (b *Box) GetResponse(user User) BoxResponse {
 
 // AddUser adds a user to the box, if user is already in box, returns an error if user already in box
 func (b *Box) AddUser(user User) error {
-	if !b.IsUserRegistered(user) {
+	if b.IsUserRegistered(user) {
 		return errors.New("User is already registered in this box")
 	}
 	b.Users = append(b.Users, user.GetId())
