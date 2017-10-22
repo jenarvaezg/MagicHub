@@ -23,7 +23,7 @@ func RegisterInBoxHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if box.ChallengePassword(registerRequest.Passphrase) {
+	if !box.ChallengePassword(registerRequest.Passphrase) {
 		utils.ResponseError(w, "Provided passphrase is not valid for this box", http.StatusBadRequest)
 		return
 	}
@@ -41,8 +41,12 @@ func RemoveFromBoxHandler(w http.ResponseWriter, r *http.Request) {
 	box := getBox(r)
 
 	if err := box.RemoveUser(getCurrentUser(r)); err != nil {
-		utils.ResponseError(w, "Provided passphrase is not valid for this box", http.StatusBadRequest)
-	} else {
-		w.WriteHeader(http.StatusNoContent)
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+	if err := box.Save(); err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
