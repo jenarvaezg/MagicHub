@@ -39,13 +39,13 @@ script:
 
 
 after_success:
-  echo $TRAVIS_BRANCH
+  - echo $TRAVIS_BRANCH;
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     ./build_image.sh;
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push jenarvaezg/magicbox:$MAGICBOX_VERSION;
     fi
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    echo Deploying
+    echo Deploying;
     sshpass -p "$MAGICBOX_BACKEND_PASSWORD" ssh $MAGICBOX_BACKEND_USER@$MAGICBOX_BACKEND_URL ./restart.sh;
     fi
