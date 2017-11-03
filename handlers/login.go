@@ -15,6 +15,7 @@ func LoginRequestHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(token))
 
