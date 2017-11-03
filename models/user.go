@@ -79,12 +79,10 @@ func NewUser(request UserRequest) (*User, error) {
 		FirstName: request.FirstName,
 		LastName:  request.LastName,
 	}
-	if request.Password != nil {
-		if err := validatePassword(*request.Password); err != nil {
-			return user, err
-		}
-		user.SetPassword(*request.Password)
+	if err := validatePassword(*request.Password); err != nil {
+		return user, err
 	}
+	user.SetPassword(*request.Password)
 	return user, nil
 }
 
