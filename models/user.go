@@ -195,9 +195,6 @@ func (u *User) Update(request UserRequest) error {
 	u.Email = request.Email
 	u.FirstName = request.FirstName
 	u.LastName = request.LastName
-	log.Println(request.Password)
-	log.Println(*request.Password)
-	log.Println(u.Password)
 	if request.Password != nil {
 		if err := validatePassword(*request.Password); err != nil {
 			return err

@@ -29,7 +29,11 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, _ := models.NewUser(userRequest)
+	user, err := models.NewUser(userRequest)
+	if err != nil {
+		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	if err := user.Save(); err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 	} else {

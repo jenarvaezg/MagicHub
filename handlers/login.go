@@ -11,7 +11,6 @@ import (
 func LoginRequestHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	token, err := auth.GetAuthToken(r.Form)
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if err != nil {
 		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
 		return
