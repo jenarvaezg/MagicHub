@@ -2,12 +2,12 @@ version: '2'
 services:
   mongo:
     image: mongo
-    container_name: mongo
+    container_name: mongo:3.4
     hostname: mongo
     ports:
       - "27017:27017"
   magicbox:
-    image: jenarvaezg/magicbox:0.1.3
+    image: jenarvaezg/magicbox:0.1.4
     container_name: magicbox
     environment:
       - MONGO_URL=mongo
