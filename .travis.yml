@@ -47,5 +47,5 @@ after_success:
     fi
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
     echo Deploying;
-    sshpass -p "$MAGICBOX_BACKEND_PASSWORD" ssh $MAGICBOX_BACKEND_USER@$MAGICBOX_BACKEND_URL ./restart.sh;
+    sshpass -p "$MAGICBOX_BACKEND_PASSWORD" ssh -o "StrictHostKeyChecking no" -y $MAGICBOX_BACKEND_USER@$MAGICBOX_BACKEND_URL ./restart.sh;
     fi

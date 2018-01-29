@@ -6,6 +6,8 @@ services:
     hostname: mongo
     ports:
       - "27017:27017"
+    volumes:
+      - "./data:/data/db"
   magicbox:
     image: jenarvaezg/magicbox:0.1.6
     container_name: magicbox
