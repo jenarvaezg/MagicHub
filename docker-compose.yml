@@ -4,10 +4,8 @@ services:
     image: mongo:3.4
     container_name: mongo
     hostname: mongo
-    ports:
-      - "27017:27017"
     volumes:
-      - "./data:/data/db"
+      - ./data:/data/db
   magicbox:
     image: jenarvaezg/magicbox:0.1.6
     container_name: magicbox
@@ -15,6 +13,6 @@ services:
       - MONGO_URL=mongo
       - MONGO_DATABASE=magicbox
     ports:
-      - "8000:8000"
+      - 8000:8000
     links:
-        - mongo
+      - mongo
