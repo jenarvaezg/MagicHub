@@ -40,6 +40,7 @@ func init() {
 }
 
 func main() {
+	log.Println("Setting up routes")
 	middlewareRouter := mux.NewRouter()
 	router := mux.NewRouter() //two routers are neccesary due to negroni
 	// Token routes
@@ -91,8 +92,10 @@ func main() {
 	))
 	middlewareRouter.PathPrefix(loginRoute).Handler(negroni.New(
 		negroni.NewLogger(),
+		cors.AllowAll(),
 		negroni.Wrap(tokenRouter),
 	))
 
+	log.Println("Server starting at port", port)
 	log.Panic(http.ListenAndServe(":"+port, middlewareRouter))
 }
