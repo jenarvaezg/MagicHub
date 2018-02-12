@@ -26,13 +26,7 @@ const (
 var apiCommonMiddleware *negroni.Negroni
 
 func getAPICommonMiddleware() *negroni.Negroni {
-	optionsMiddleware := cors.New(cors.Options{
-		AllowedMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
-		AllowedHeaders:     []string{"*"},
-		AllowCredentials:   true,
-		OptionsPassthrough: false,
-		Debug:              true,
-	})
+	optionsMiddleware := cors.AllowAll()
 	return negroni.New(
 		negroni.NewLogger(),
 		optionsMiddleware,
