@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -43,6 +44,7 @@ type GoogleFrontendRequest struct {
 }
 
 func getGoogleKeys() (keys []*gojwk.Key, err error) {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //TODO REMOVE
 	r, err := http.Get(googleCertURL)
 	if err != nil {
 		return
