@@ -33,7 +33,7 @@ type User struct {
 	LastName           string     `bson:"lastName"`
 	Status             userStatus `bson:"status"`
 	FromGoogle         bool       `bson:"from_google"`
-	ImageURL           string     `bson:image_url`
+	ImageURL           string     `bson:"image_url"`
 }
 
 // UserRequest is a struct that resembles a request performed by users to edit or create a user
@@ -44,7 +44,7 @@ type UserRequest struct {
 	FirstName  string  `json:"firstName"`
 	LastName   string  `json:"lastName"`
 	FromGoogle bool    `json:"-"` // never comes from json
-	ImageURL   string  `json:image_url`
+	ImageURL   string  `json:"image_url"`
 }
 
 //UserResponse is a struct that resembles a response for user detail and listing
