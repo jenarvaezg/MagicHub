@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -33,8 +34,8 @@ func getJWT(user models.User) (string, error) {
 	return token.SignedString(mySigningKey)
 }
 
-// GetAuthToken returns an auth token for the requesting user and passoword, or an error
-func GetAuthToken(form url.Values) (token string, err error) {
+// GetAuthTokenFromForm returns an auth token for the requesting user and passoword, or an error
+func GetAuthTokenFromForm(form url.Values) (token string, err error) {
 	grantType := form.Get("grant_type")
 	if grantType == grantTypePassword {
 		username, password := form.Get("username"), form.Get("password")
@@ -46,9 +47,35 @@ func GetAuthToken(form url.Values) (token string, err error) {
 			return token, errors.New("Invalid username or password")
 		}
 
-		return getJWT(user)
+		return getJWT(*user)
 
 	}
 	return token, errors.New("Unsupported grant type")
+}
 
+/*
+GetAuthTokenFromGoogleToken returns an auth token from a frontend google auth requests
+If user does not exist in database, it is created
+*/
+func GetAuthTokenFromGoogleToken(googleReq GoogleFrontendRequest) (token string, err error) {
+	if err = validateGoogleToken(googleReq.Token); err != nil {
+		return
+	}
+
+	email := googleReq.Profile.Email
+	user, err := models.GetUserByEmail(email)
+	if err != nil {
+		req := userRequestFromGoogleProfile(googleReq.Profile)
+		user, err = models.NewUser(req)
+		fmt.Println(req)
+		if err != nil {
+			return
+		}
+		fmt.Println(user.Save()) //save does not update id
+		user, err = models.GetUserByEmail(email)
+		fmt.Println(user, err)
+	}
+	fmt.Println(user)
+
+	return getJWT(*user)
 }

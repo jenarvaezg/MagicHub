@@ -32,15 +32,19 @@ type User struct {
 	FirstName          string     `bson:"firstName"`
 	LastName           string     `bson:"lastName"`
 	Status             userStatus `bson:"status"`
+	FromGoogle         bool       `bson:"from_google"`
+	ImageURL           string     `bson:image_url`
 }
 
 // UserRequest is a struct that resembles a request performed by users to edit or create a user
 type UserRequest struct {
-	Username  string  `json:"username"`
-	Password  *string `json:"password,omitempty"`
-	Email     string  `json:"email"`
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
+	Username   string  `json:"username"`
+	Password   *string `json:"password,omitempty"`
+	Email      string  `json:"email"`
+	FirstName  string  `json:"firstName"`
+	LastName   string  `json:"lastName"`
+	FromGoogle bool    `json:"-"` // never comes from json
+	ImageURL   string  `json:image_url`
 }
 
 //UserResponse is a struct that resembles a response for user detail and listing
@@ -73,12 +77,18 @@ func validatePassword(password string) error {
 // NewUser returns an User instance, with status set to inactive
 func NewUser(request UserRequest) (*User, error) {
 	user := &User{
-		Status:    userInactive,
-		Username:  request.Username,
-		Email:     request.Email,
-		FirstName: request.FirstName,
-		LastName:  request.LastName,
+		Status:     userInactive,
+		Username:   request.Username,
+		Email:      request.Email,
+		FirstName:  request.FirstName,
+		LastName:   request.LastName,
+		ImageURL:   request.ImageURL,
+		FromGoogle: request.FromGoogle,
 	}
+	if user.FromGoogle { // ignore password stuff
+		return user, nil
+	}
+
 	if err := validatePassword(*request.Password); err != nil {
 		return user, err
 	}
@@ -87,17 +97,17 @@ func NewUser(request UserRequest) (*User, error) {
 }
 
 // GetUserByEmail return an user from database if the email exists
-func GetUserByEmail(email string) (User, error) {
-	user := User{}
-	err := userCollection.FindOne(bson.M{"email": email}, &user)
+func GetUserByEmail(email string) (*User, error) {
+	user := &User{}
+	err := userCollection.FindOne(bson.M{"email": email}, user)
 	return user, err
 
 }
 
 // GetUserByUsername return an user from database if the email exists
-func GetUserByUsername(username string) (User, error) {
-	user := User{}
-	err := userCollection.FindOne(bson.M{"username": username}, &user)
+func GetUserByUsername(username string) (*User, error) {
+	user := &User{}
+	err := userCollection.FindOne(bson.M{"username": username}, user)
 
 	return user, err
 
@@ -142,7 +152,11 @@ func (u *User) validate() error {
 	if err := u.validateEmail(); err != nil {
 		return err
 	}
-	return validatePassword(u.Password)
+	if !u.FromGoogle {
+		return validatePassword(u.Password)
+	}
+
+	return nil
 }
 
 func (u *User) validateEmail() error {
