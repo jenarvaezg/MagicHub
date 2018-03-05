@@ -11,6 +11,7 @@ addons:
   apt:
     packages:
       - sshpass
+      - ca-certificates
 
 
 # Email me the results of the test runs.
