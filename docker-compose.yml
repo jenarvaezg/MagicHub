@@ -7,7 +7,7 @@ services:
     volumes:
       - ./data:/data/db
   magicbox:
-    image: jenarvaezg/magicbox:0.1.8
+    image: jenarvaezg/magicbox:0.2.0
     container_name: magicbox
     environment:
       - MONGO_URL=mongo
