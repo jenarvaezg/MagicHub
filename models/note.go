@@ -54,9 +54,6 @@ func (n *Note) Validate() error {
 	if n.Title == "" {
 		return errors.New("Missing title field")
 	}
-	if n.Detail == "" {
-		return errors.New("Missing detail field")
-	}
 	return nil
 }
 
