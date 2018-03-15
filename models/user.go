@@ -44,7 +44,7 @@ type UserRequest struct {
 	FirstName  string  `json:"firstName"`
 	LastName   string  `json:"lastName"`
 	FromGoogle bool    `json:"-"` // never comes from json
-	ImageURL   string  `json:"image_url"`
+	ImageURL   string  `json:"imageUrl"`
 }
 
 //UserResponse is a struct that resembles a response for user detail and listing
@@ -55,6 +55,7 @@ type UserResponse struct {
 	LastName  string        `json:"lastName"`
 	Status    userStatus    `json:"status"`
 	ID        bson.ObjectId `json:"id"`
+	ImageURL  string        `json:"imageUrl"`
 }
 
 // UserList is a list of User Documents
@@ -76,6 +77,7 @@ func validatePassword(password string) error {
 
 // NewUser returns an User instance, with status set to inactive
 func NewUser(request UserRequest) (*User, error) {
+	log.Println(request.ImageURL)
 	user := &User{
 		Status:     userInactive,
 		Username:   request.Username,
@@ -209,11 +211,15 @@ func (u *User) Update(request UserRequest) error {
 	u.Email = request.Email
 	u.FirstName = request.FirstName
 	u.LastName = request.LastName
-	if request.Password != nil {
-		if err := validatePassword(*request.Password); err != nil {
-			return err
+	if request.FromGoogle {
+		u.ImageURL = request.ImageURL
+	} else {
+		if request.Password != nil {
+			if err := validatePassword(*request.Password); err != nil {
+				return err
+			}
+			u.SetPassword(*request.Password)
 		}
-		u.SetPassword(*request.Password)
 	}
 
 	return u.Save()
@@ -227,6 +233,7 @@ func (u *User) GetResponse() UserResponse {
 		Email:     u.Email,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
+		ImageURL:  u.ImageURL,
 		ID:        u.GetId(),
 	}
 	return response

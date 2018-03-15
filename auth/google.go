@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -62,7 +61,6 @@ func parseToken(googleToken GoogleToken) (*jwt.Token, error) {
 	var token *jwt.Token
 	keys, err := getGoogleKeys()
 	if err != nil {
-		log.Println(err)
 		return &jwt.Token{}, err
 	}
 
@@ -105,6 +103,7 @@ func userRequestFromGoogleProfile(profile GoogleUserProfile) models.UserRequest 
 		LastName:   profile.FamilyName,
 		Password:   &pass,
 		FromGoogle: true,
+		ImageURL:   profile.ImageURL,
 	}
 
 	return req
