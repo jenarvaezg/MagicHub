@@ -13,6 +13,9 @@ addons:
       - sshpass
       - ca-certificates
 
+branches:
+  except:
+    - gh-pages
 
 # Email me the results of the test runs.
 notifications:
