@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -67,11 +68,12 @@ func GetAuthTokenFromGoogleToken(googleReq GoogleFrontendRequest) (token string,
 	if err != nil {
 		user, err = models.NewUser(req)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
-		user, err = models.GetUserByEmail(email)
 	} else {
 		if err = user.Update(req); err != nil {
+			fmt.Println(err)
 			return
 		}
 	}
