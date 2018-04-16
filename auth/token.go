@@ -71,6 +71,10 @@ func GetAuthTokenFromGoogleToken(googleReq GoogleFrontendRequest) (token string,
 			fmt.Println(err)
 			return
 		}
+		if err = user.Save(); err != nil {
+			fmt.Println(err)
+			return
+		}
 	} else {
 		if err = user.Update(req); err != nil {
 			fmt.Println(err)
