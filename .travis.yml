@@ -1,9 +1,9 @@
 language: go
 
 go:
-  - 1.9
+  - "1.10"
 
-go_import_path: github.com/jenarvaezg/magicbox
+go_import_path: github.com/jenarvaezg/MagicHub
 
 install: true
 
@@ -13,10 +13,6 @@ addons:
       - sshpass
       - ca-certificates
 
-branches:
-  except:
-    - gh-pages
-
 # Email me the results of the test runs.
 notifications:
   email: true
@@ -25,31 +21,26 @@ notifications:
 # flunk the build and immediately stop. It's sorta like having
 # set -e enabled in bash.
 before_script:
-  - MAGICBOX_VERSION=$(cat version.txt)
-  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
+  - MAGICHUB_VERSION=$(cat version.txt)
   - go get github.com/golang/lint/golint                        # Linter
   - go get honnef.co/go/tools/cmd/megacheck                     # Badass static analyzer/linter
-  - go get github.com/fzipp/gocyclo
+  - go get github.com/mattn/goveralls # Sends cover data to coverall
 
 # script always run to completion (set +e). All of these code checks are must haves
 # in a modern Go project.
 script:
-  - test -z $(gofmt -s -l $GO_FILES)         # Fail if a .go file hasn't been formatted with gofmt
-  - go test -v -race ./...                   # Run all the tests with the race detector enabled
+  - ./test_and_coverage.sh
   - go vet ./...                             # go vet is the official Go static analyzer
   - megacheck ./...                          # "go vet on steroids" + linter
-  - gocyclo -over 19 $GO_FILES               # forbid code with huge functions
   - golint -set_exit_status $(go list ./...) # one last linter
 
-
 after_success:
-  - echo $TRAVIS_BRANCH;
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     ./build_image.sh;
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push jenarvaezg/magicbox:$MAGICBOX_VERSION;
+    docker push jenarvaezg/magichub:$MAGICHUB_VERSION;
     fi
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
     echo Deploying;
-    sshpass -p "$MAGICBOX_BACKEND_PASSWORD" ssh -o "StrictHostKeyChecking no" -y $MAGICBOX_BACKEND_USER@$MAGICBOX_BACKEND_URL ./restart.sh;
+    sshpass -p "$MAGICHUB_BACKEND_PASSWORD" ssh -o "StrictHostKeyChecking no" -y $MAGICHUB_BACKEND_USER@$MAGICHUB_BACKEND_URL ./restart.sh;
     fi

@@ -1,4 +1,1 @@
-# MagicBox
-
-[![Build Status](https://travis-ci.org/jenarvaezg/MagicBox.svg?branch=master)](https://travis-ci.org/jenarvaezg/MagicBox)
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/2710345/magicbox/716dFkH)
+# MagicHub [![Build Status](https://travis-ci.org/jenarvaezg/MagicHub.svg)](https://travis-ci.org/jenarvaezg/MagicHub) [![Go Report Card](https://goreportcard.com/badge/github.com/jenarvaezg/MagicHub)](https://goreportcard.com/report/github.com/jenarvaezg/MagicHub) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4e1203992fde411ba709c56c456e3b80)](https://www.codacy.com/app/jenarvaezg/MagicHub?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jenarvaezg/MagicHub&amp;utm_campaign=Badge_Grade) [![Coverage Status](https://coveralls.io/repos/github/jenarvaezg/MagicHub/badge.svg)](https://coveralls.io/github/jenarvaezg/MagicHub) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/jenarvaezg/MagicHub/blob/master/LICENSE)

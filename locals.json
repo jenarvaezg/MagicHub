@@ -1,0 +1,22 @@
+{
+  "en-US": {
+    "validation.field_required": "Field '%s' is required.",
+    "validation.field_invalid": "Field '%s' has an invalid value.",
+    "validation.field_invalid_id": "Field '%s' contains an invalid object id value.",
+    "validation.field_minlen": "Field '%s' must be at least %v characters long.",
+    "validation.field_maxlen": "Field '%s' can be maximum %v characters long.",
+    "validation.entry_exists": "%s already exists for value '%v'.",
+    "validation.field_not_exclusive": "Only one of both fields can be set: '%s'' or '%s'.",
+    "validation.field_required_exclusive": "Field '%s' or '%s' required."
+  },
+  "es-ES": {
+    "validation.field_required": "El campo '%s' is obligatorio.",
+    "validation.field_invalid": "El campo '%s' tiene un valor inválido.",
+    "validation.field_invalid_id": "El campo '%s' contiene un valor inválido para un ID",
+    "validation.field_minlen": "El campo '%s' debe tener al menos %v carácteres",
+    "validation.field_maxlen": "El campo '%s' debe tener como máximo %v carácteres",
+    "validation.entry_exists": "%s ya existe para el valor '%v'.",
+    "validation.field_not_exclusive": "Solo uno de los siguientes campos se puede escoger: '%s'' or '%s'.",
+    "validation.field_required_exclusive": "Los campos '%s' o '%s' son obligatorios."
+  }
+}
