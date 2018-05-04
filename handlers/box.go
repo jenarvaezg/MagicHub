@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/jenarvaezg/magicbox/models"
-	"github.com/jenarvaezg/magicbox/utils"
+	"github.com/jenarvaezg/MagicHub/models"
+	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 func getBoxRequest(r *http.Request) (models.BoxRequest, error) {

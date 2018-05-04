@@ -1,3 +1,3 @@
 FROM scratch
-ADD magicbox /
-CMD ["/magicbox"]
+ADD MagicHub /
+CMD ["/MagicHub"]

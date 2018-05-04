@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jenarvaezg/magicbox/auth"
-	"github.com/jenarvaezg/magicbox/utils"
+	"github.com/jenarvaezg/MagicHub/auth"
+	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 func loginWithOwnUser(w http.ResponseWriter, r *http.Request) {

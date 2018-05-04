@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jenarvaezg/magicbox/models"
-	"github.com/jenarvaezg/magicbox/utils"
+	"github.com/jenarvaezg/MagicHub/models"
+	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 func getNoteRequest(r *http.Request) (models.NoteRequest, error) {

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/jenarvaezg/magicbox/models"
+	"github.com/jenarvaezg/MagicHub/models"
 )
 
 const (
@@ -26,7 +26,7 @@ func getJWT(user models.User) (string, error) {
 
 	claims := TokenClaims{user.GetResponse(), jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
-		Issuer:    "magicbox.auh",
+		Issuer:    "magichub.auh",
 		IssuedAt:  time.Now().Unix(),
 		Subject:   user.Username,
 	}}

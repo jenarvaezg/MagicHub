@@ -6,12 +6,12 @@ services:
     hostname: mongo
     volumes:
       - ./data:/data/db
-  magicbox:
-    image: jenarvaezg/magicbox:0.2.4
-    container_name: magicbox
+  magichub:
+    image: jenarvaezg/magichub:0.2.4
+    container_name: magichub
     environment:
       - MONGO_URL=mongo
-      - MONGO_DATABASE=magicbox
+      - MONGO_DATABASE=magichub
     ports:
       - 8000:8000
     links:

@@ -4,8 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jenarvaezg/magicbox/handlers"
-	"github.com/jenarvaezg/magicbox/middleware"
+	"github.com/graphql-go/graphql"
+	"github.com/graphql-go/handler"
+	"github.com/jenarvaezg/MagicHub/handlers"
+	"github.com/jenarvaezg/MagicHub/middleware"
+	"github.com/jenarvaezg/MagicHub/team"
+	"github.com/jenarvaezg/MagicHub/utils"
 	"github.com/rs/cors"
 	"github.com/urfave/negroni"
 
@@ -35,11 +39,34 @@ func getAPICommonMiddleware() *negroni.Negroni {
 	)
 }
 
+func getGraphQLSchema() *graphql.Schema {
+	teamRepo := team.NewMongoRepository()
+	teamController := team.NewGraphQLController(teamRepo, team.NewService(teamRepo))
+
+	queryFields := utils.MergeGraphQLFields(teamController.GetQueries())
+	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: queryFields}
+
+	mutationFields := utils.MergeGraphQLFields(teamController.GetMutations())
+	rootMutation := graphql.ObjectConfig{Name: "RootMutation", Fields: mutationFields}
+
+	schemaConfig := graphql.SchemaConfig{
+		Query:    graphql.NewObject(rootQuery),
+		Mutation: graphql.NewObject(rootMutation),
+	}
+	schema, err := graphql.NewSchema(schemaConfig)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return &schema
+}
+
 func init() {
 	apiCommonMiddleware = getAPICommonMiddleware()
 }
 
 func main() {
+
 	log.Println("Setting up routes")
 	middlewareRouter := mux.NewRouter()
 	router := mux.NewRouter() //two routers are neccesary due to negroni
@@ -76,9 +103,9 @@ func main() {
 	userDetailRouter.HandleFunc("", handlers.UserDetailHandler).Methods("GET")
 	userDetailRouter.HandleFunc("", handlers.UserDeleteHandler).Methods("DELETE")
 	userDetailRouter.HandleFunc("", handlers.UserPatchHandler).Methods("PATCH")
+
 	// Middlewares
 	// Order matters, we have to go from most to least specific routes
-
 	middlewareRouter.PathPrefix(baseRoute + userRoute + idRoute).Handler(apiCommonMiddleware.With(
 		middleware.NewRequireUserMiddleware(),
 		negroni.Wrap(userDetailRouter),
@@ -95,7 +122,36 @@ func main() {
 		cors.AllowAll(),
 		negroni.Wrap(tokenRouter),
 	))
+	middlewareRouter.PathPrefix("/").Handler(negroni.New(
+		cors.AllowAll(),
+		negroni.Wrap(router),
+	))
+
+	graphHandler := handler.New(&handler.Config{
+		Schema:   getGraphQLSchema(),
+		Pretty:   true,
+		GraphiQL: true,
+	})
+
+	router.Handle("/graphql", graphHandler)
 
 	log.Println("Server starting at port", port)
 	log.Panic(http.ListenAndServe(":"+port, middlewareRouter))
 }
+
+// query {
+//   teams(limit:1,offset:1){
+//     totalCount,
+//     nodes{
+//       id,
+//       name
+//     }
+//   }
+// }
+
+// mutation {
+//   chameleon: createTeam(
+//    displayName:"Chameleon",name:"chameleon",description:"Los mas pringaos"){
+//   	id
+//   }
+// }

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/jenarvaezg/magicbox/models"
+	"github.com/jenarvaezg/MagicHub/models"
 	"github.com/mendsley/gojwk"
 	"golang.org/x/oauth2"
 )

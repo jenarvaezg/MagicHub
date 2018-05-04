@@ -8,9 +8,9 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
-	"github.com/jenarvaezg/magicbox/auth"
-	"github.com/jenarvaezg/magicbox/models"
-	"github.com/jenarvaezg/magicbox/utils"
+	"github.com/jenarvaezg/MagicHub/auth"
+	"github.com/jenarvaezg/MagicHub/models"
+	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 // RequireJSONMiddleware is a struct that has a ServeHTTP method

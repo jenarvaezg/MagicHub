@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-bongo/bongo"
 	"github.com/gorilla/mux"
-	"github.com/jenarvaezg/magicbox/models"
-	"github.com/jenarvaezg/magicbox/utils"
+	"github.com/jenarvaezg/MagicHub/models"
+	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 // RequireJSONFunc is a MatcherFunc for gorilla mux, which specifies that a method is accesed with json
