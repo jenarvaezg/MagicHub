@@ -62,11 +62,9 @@ func (c *controller) queryTeams(params graphql.ResolveParams) (interface{}, erro
 	search, _ := params.Args["search"].(string)
 
 	var result ListResult
-	teams, err := c.service.FindFiltered(limit, offset, search)
-	for _, teamP := range teams {
-		result.Nodes = append(result.Nodes, teamP)
-	}
+	var err error
 
+	result.Nodes, err = c.service.FindFiltered(limit, offset, search)
 	result.TotalCount = len(result.Nodes)
 	return result, err
 }

@@ -35,8 +35,8 @@ func (s *service) FindFiltered(limit, offset int, search string) ([]*Team, error
 func (s *service) CreateTeam(name, image, description string) (*Team, error) {
 	team := &Team{Name: name, Image: image, Description: description}
 
+	log.Println("Tengo ya", team)
 	_, err := s.repo.Store(team)
-	log.Println("Ya he stored", team.ID)
 
 	return team, err
 }

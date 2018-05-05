@@ -11,6 +11,7 @@ import (
 const collectionName = "team"
 
 type repo struct {
+	connection *mongodm.Connection
 }
 
 type teamDocument struct {
@@ -24,13 +25,20 @@ type teamDocument struct {
 
 // NewMongoRepository returns a object that implements the repository interface using mongodb
 func NewMongoRepository() Repository {
-	return &repo{}
+	connection := db.GetMongoConnection()
+	connection.Register(&teamDocument{}, collectionName)
+	index := mgo.Index{
+		Key: []string{"$text:name", "$text:description"},
+	}
+	connection.Session.DB(db.DATABASE_NAME).C(collectionName).EnsureIndex(index)
+
+	return &repo{connection}
 }
 
 // Store saves a team to mongodb and returns a pointer to the team with updated fields
 func (r *repo) Store(t *Team) (bson.ObjectId, error) {
 	teamDoc := &teamDocument{Image: t.Image, Name: t.Name, RouteName: t.RouteName, Description: t.Description}
-	model := getModel()
+	model := r.getModel()
 
 	model.New(teamDoc)
 	if err := teamDoc.Save(); err != nil {
@@ -44,7 +52,7 @@ func (r *repo) Store(t *Team) (bson.ObjectId, error) {
 
 // FindFiltered returns a list of pointer to teams from mongodb filtered by limit offset and search parameter
 func (r *repo) FindFiltered(limit, offset int, search string) ([]*Team, error) {
-	model := getModel()
+	model := r.getModel()
 	var query *mongodm.Query
 
 	if search != "" {
@@ -70,7 +78,7 @@ func (r *repo) FindFiltered(limit, offset int, search string) ([]*Team, error) {
 
 // Find returns a matching team by ID or error if not found
 func (r *repo) Find(id bson.ObjectId) (*Team, error) {
-	model := getModel()
+	model := r.getModel()
 	teamDoc := teamDocument{}
 
 	if err := model.FindId(id).Exec(&teamDoc); err != nil {
@@ -90,15 +98,6 @@ func (t teamDocument) instanceFromModel() *Team {
 	}
 }
 
-func getModel() *mongodm.Model {
-	return db.Connection.Model("teamDocument")
-}
-
-func init() {
-	db.Connection.Register(&teamDocument{}, collectionName)
-	index := mgo.Index{
-		Key: []string{"$text:name", "$text:description"},
-	}
-	db.Connection.Session.DB(db.DATABASE_NAME).C(collectionName).EnsureIndex(index)
-
+func (r repo) getModel() *mongodm.Model {
+	return r.connection.Model("teamDocument")
 }
