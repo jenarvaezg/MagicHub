@@ -31,7 +31,7 @@ func (s *service) GetAuthTokenByProvider(inToken, provider string) (outToken *To
 	case "google":
 		authProvider = newGoogleAuthProvider(s.userService)
 	default:
-		err = fmt.Errorf("Provider %s is not supported", provider)
+		return nil, fmt.Errorf("Provider %s is not supported", provider)
 	}
 
 	user, err := authProvider.GetUserFromToken(inToken)

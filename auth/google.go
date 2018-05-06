@@ -19,21 +19,6 @@ const (
 	expectedIssuer   = "accounts.google.com"
 )
 
-// GoogleUserProfile is the representation of the profile given by Google
-type googleUserProfile struct {
-	ID         string `json:"googleId"`
-	GivenName  string `json:"given_name"`
-	FamilyName string `json:"family_name"`
-	Picture    string `json:"picture"`
-	Email      string `json:"email"`
-}
-
-// // googleToken is the  basic OAuth token with google's jwt
-// type googleToken struct {
-// 	oauth2.Token `json:",inline"`
-// 	JWT          string `json:"id_token"`
-// }
-
 type googleToken = string
 
 type googleAuthProvider struct {
