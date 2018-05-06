@@ -1,7 +1,6 @@
 package team
 
 import (
-	"log"
 	"strings"
 )
 
@@ -26,7 +25,7 @@ func (s *service) GetRouteNameFromName(name string) string {
 	return strings.ToLower(strings.Replace(name, " ", "", -1))
 }
 
-// FindFiltered returns a list of projects filtered by limit offset and search params
+// FindFiltered returns a list of teams filtered by limit offset and search params
 func (s *service) FindFiltered(limit, offset int, search string) ([]*Team, error) {
 	return s.repo.FindFiltered(limit, offset, search)
 }
@@ -35,7 +34,6 @@ func (s *service) FindFiltered(limit, offset int, search string) ([]*Team, error
 func (s *service) CreateTeam(name, image, description string) (*Team, error) {
 	team := &Team{Name: name, Image: image, Description: description}
 
-	log.Println("Tengo ya", team)
 	_, err := s.repo.Store(team)
 
 	return team, err

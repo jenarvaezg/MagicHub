@@ -1,86 +1,47 @@
 package auth
 
 import (
-	"errors"
-	"fmt"
-	"net/url"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/jenarvaezg/MagicHub/models"
+	"github.com/jenarvaezg/MagicHub/user"
 )
 
-const (
-	grantTypePassword = "password"
-)
+// Token is a type that holds a JWT inside and the user that owns the token
+type Token struct {
+	JWT  string     `json:"jwt"`
+	User *user.User `json:"user"`
+}
 
-// TokenClaims is a struct for the JWT claims
-type TokenClaims struct {
-	User models.UserResponse `json:"user"`
+// tokenClaims is a struct for the JWT claims
+type tokenClaims struct {
+	User user.User `json:"user"`
 	jwt.StandardClaims
 }
 
 var mySigningKey = []byte("AllYourBase") //TODO use real key
 
-func getJWT(user models.User) (string, error) {
+func generateToken(u *user.User) (*Token, error) {
 
-	claims := TokenClaims{user.GetResponse(), jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
+	claims := tokenClaims{*u, jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Hour * 24 * 5).Unix(),
 		Issuer:    "magichub.auh",
 		IssuedAt:  time.Now().Unix(),
-		Subject:   user.Username,
+		Subject:   u.Username,
 	}}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	return token.SignedString(mySigningKey)
+	signedJWT, err := token.SignedString(mySigningKey)
+	return &Token{JWT: signedJWT, User: u}, err
 }
 
-// GetAuthTokenFromForm returns an auth token for the requesting user and passoword, or an error
-func GetAuthTokenFromForm(form url.Values) (token string, err error) {
-	grantType := form.Get("grant_type")
-	if grantType == grantTypePassword {
-		username, password := form.Get("username"), form.Get("password")
-		user, err := models.GetUserByUsername(username)
-		if err != nil {
-			return token, errors.New("Invalid username or password")
-		}
-		if ok := user.ChallengePassword(password); !ok {
-			return token, errors.New("Invalid username or password")
-		}
-
-		return getJWT(*user)
-
-	}
-	return token, errors.New("Unsupported grant type")
-}
-
-/*
-GetAuthTokenFromGoogleToken returns an auth token from a frontend google auth requests
-If user does not exist in database, it is created
-*/
-func GetAuthTokenFromGoogleToken(googleReq GoogleFrontendRequest) (token string, err error) {
-	if err = validateGoogleToken(googleReq.Token); err != nil {
-		return
+// GetUserFromToken returns the user held inside a JWT or error if not a valid JWT
+func GetUserFromToken(tokenString string) (*user.User, error) {
+	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		return mySigningKey, nil
 	}
 
-	email := googleReq.Profile.Email
-	req := userRequestFromGoogleProfile(googleReq.Profile)
-	user, err := models.GetUserByEmail(email)
-	if err != nil {
-		user, err = models.NewUser(req)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		if err = user.Save(); err != nil {
-			fmt.Println(err)
-			return
-		}
-	} else {
-		if err = user.Update(req); err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
+	claims := tokenClaims{}
+	_, err := jwt.ParseWithClaims(tokenString, &claims, keyFunc)
 
-	return getJWT(*user)
+	return &claims.User, err
 }

@@ -30,7 +30,7 @@ func NewMongoRepository() Repository {
 	index := mgo.Index{
 		Key: []string{"$text:name", "$text:description"},
 	}
-	connection.Session.DB(db.DATABASE_NAME).C(collectionName).EnsureIndex(index)
+	connection.Session.DB(db.DatabaseName).C(collectionName).EnsureIndex(index)
 
 	return &repo{connection}
 }
@@ -76,8 +76,8 @@ func (r *repo) FindFiltered(limit, offset int, search string) ([]*Team, error) {
 	return teamInstances, err
 }
 
-// Find returns a matching team by ID or error if not found
-func (r *repo) Find(id bson.ObjectId) (*Team, error) {
+// FindByID returns a matching team by ID or error if not found
+func (r *repo) FindByID(id bson.ObjectId) (*Team, error) {
 	model := r.getModel()
 	teamDoc := teamDocument{}
 

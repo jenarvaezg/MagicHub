@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"github.com/jenarvaezg/MagicHub/auth"
 	"github.com/jenarvaezg/MagicHub/models"
@@ -121,43 +120,20 @@ func extractJWTFromHeader(authHeader string) (string, error) {
 	return authHeaderParts[1], nil
 }
 
-func getTokenClaims(tokenString string) (*auth.TokenClaims, error) {
-	keyFunc := func(t *jwt.Token) (interface{}, error) {
-		return []byte("AllYourBase"), nil
-	}
-
-	claims := &auth.TokenClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, keyFunc)
-	claims, _ = token.Claims.(*auth.TokenClaims)
-	return claims, err
-}
-
-func isCreateUserRequest(r *http.Request) bool {
-	return r.Method == "POST" && r.URL.RequestURI() == "/api/v1/user"
-}
-
 /*
 UserFromJWTMiddleware's handler, extracts JWT from auth header, validates JWT and inserts user in the request context
 */
 func (l *UserFromJWTMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if isCreateUserRequest(r) {
+
+	token, err := extractJWTFromHeader(r.Header.Get("Authorization"))
+	if err != nil {
 		next(w, r)
 		return
 	}
-	token, err := extractJWTFromHeader(r.Header.Get("Authorization"))
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-	claims, err := getTokenClaims(token)
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusForbidden)
-		return
-	}
 
-	user, err := models.GetUserByID(claims.User.ID.Hex())
+	user, err := auth.GetUserFromToken(token)
 	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusBadRequest)
+		next(w, r)
 		return
 	}
 

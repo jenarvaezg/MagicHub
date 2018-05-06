@@ -6,8 +6,7 @@ import (
 	"github.com/jenarvaezg/MagicHub/utils"
 )
 
-// ListResult is a list of Teams
-type ListResult struct {
+type listResult struct {
 	Nodes      []*Team `json:"nodes"`
 	TotalCount int     `json:"totalCount"`
 }
@@ -61,7 +60,7 @@ func (c *controller) queryTeams(params graphql.ResolveParams) (interface{}, erro
 	offset, _ := params.Args["offset"].(int)
 	search, _ := params.Args["search"].(string)
 
-	var result ListResult
+	var result listResult
 	var err error
 
 	result.Nodes, err = c.service.FindFiltered(limit, offset, search)

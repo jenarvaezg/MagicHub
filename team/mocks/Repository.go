@@ -10,8 +10,8 @@ type Repository struct {
 	mock.Mock
 }
 
-// Find provides a mock function with given fields: id
-func (_m *Repository) Find(id bson.ObjectId) (*team.Team, error) {
+// FindByID provides a mock function with given fields: id
+func (_m *Repository) FindByID(id bson.ObjectId) (*team.Team, error) {
 	ret := _m.Called(id)
 
 	var r0 *team.Team
