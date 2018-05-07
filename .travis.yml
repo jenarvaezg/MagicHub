@@ -3,7 +3,7 @@ language: go
 go:
   - "1.10"
 
-go_import_path: github.com/jenarvaezg/MagicHub
+# go_import_path: github.com/jenarvaezg/MagicHub
 
 install: true
 
