@@ -12,10 +12,6 @@ import (
 	"github.com/jenarvaezg/MagicHub/utils"
 )
 
-// RequireJSONMiddleware is a struct that has a ServeHTTP method
-type RequireJSONMiddleware struct {
-}
-
 //RequireBoxMiddleware is a middleware that ensures a url's id parameter is a valid ID related to a Box document
 type RequireBoxMiddleware struct {
 }
@@ -26,11 +22,6 @@ type RequireUserMiddleware struct {
 
 //UserFromJWTMiddleware is a middleware that varifies a JWT in the Authorization header and sets the user in the conext
 type UserFromJWTMiddleware struct {
-}
-
-// NewRequireJSONMiddleware returns a RequireJSONMiddleware
-func NewRequireJSONMiddleware() *RequireJSONMiddleware {
-	return &RequireJSONMiddleware{}
 }
 
 // NewRequireBoxMiddleware returns a RequireBoxMiddleware
@@ -48,20 +39,11 @@ func NewUserFromJWTMiddleware() *UserFromJWTMiddleware {
 	return &UserFromJWTMiddleware{}
 }
 
-/*
-RequireJSONMiddleware's handler, which asserts that POST and PUT methods include content-type header
-and is set to application/json
-*/
-func (l *RequireJSONMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	methodNeedsJSON := func(method string) bool {
-		return method == "POST" || method == "PUT"
-	}
-	if methodNeedsJSON(r.Method) && r.Header.Get("content-type") != "application/json" {
-		utils.ResponseError(w, "Expected content-type to be application/json", http.StatusBadRequest)
-	} else {
-		next(w, r)
-	}
-}
+// ContextKey is //TODO
+type ContextKey string
+
+//ContextKeyCurrentUser is a key used for indexing a user in a context
+var ContextKeyCurrentUser = ContextKey("current-user")
 
 func getBox(r *http.Request) (models.Box, error) {
 	vars := mux.Vars(r)
@@ -137,6 +119,6 @@ func (l *UserFromJWTMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyCurrentUser, user))
+	r = r.WithContext(context.WithValue(r.Context(), ContextKeyCurrentUser, user))
 	next(w, r)
 }

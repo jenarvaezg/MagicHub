@@ -55,10 +55,11 @@ var teamType = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-func (c *controller) queryTeams(params graphql.ResolveParams) (interface{}, error) {
-	limit, _ := params.Args["limit"].(int)
-	offset, _ := params.Args["offset"].(int)
-	search, _ := params.Args["search"].(string)
+func (c *controller) queryTeams(p graphql.ResolveParams) (interface{}, error) {
+	utils.RequireUser(p.Context)
+	limit, _ := p.Args["limit"].(int)
+	offset, _ := p.Args["offset"].(int)
+	search, _ := p.Args["search"].(string)
 
 	var result listResult
 	var err error
@@ -68,10 +69,11 @@ func (c *controller) queryTeams(params graphql.ResolveParams) (interface{}, erro
 	return result, err
 }
 
-func (c *controller) createTeam(params graphql.ResolveParams) (interface{}, error) {
-	name, _ := params.Args["name"].(string)
-	image, _ := params.Args["image"].(string)
-	description, _ := params.Args["description"].(string)
+func (c *controller) createTeam(p graphql.ResolveParams) (interface{}, error) {
+	utils.RequireUser(p.Context)
+	name, _ := p.Args["name"].(string)
+	image, _ := p.Args["image"].(string)
+	description, _ := p.Args["description"].(string)
 
 	return c.service.CreateTeam(name, image, description)
 }

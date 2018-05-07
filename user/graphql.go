@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/jenarvaezg/MagicHub/interfaces"
+	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 type controller struct {
@@ -48,6 +49,7 @@ func (c *controller) getUserQuery() *graphql.Field {
 			"id": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.ID), Description: "User ID"},
 		},
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			utils.RequireUser(p.Context)
 			id := p.Args["id"].(string)
 			return c.service.FindByID(id)
 		},
