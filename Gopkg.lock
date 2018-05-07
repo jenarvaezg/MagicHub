@@ -10,8 +10,8 @@
 [[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
-  revision = "d2709f9f1f31ebcda9651b03077758c1f3a0018c"
-  version = "v3.0.0"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
 
 [[projects]]
   name = "github.com/go-bongo/bongo"
@@ -28,8 +28,8 @@
 [[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "24fca303ac6da784b9e8269f724ddeb0b2eea5e7"
-  version = "v1.5.0"
+  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
+  version = "v1.6.1"
 
 [[projects]]
   name = "github.com/graphql-go/graphql"
@@ -70,8 +70,8 @@
 [[projects]]
   name = "github.com/rs/cors"
   packages = ["."]
-  revision = "7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6"
-  version = "v1.2"
+  revision = "feef513b9575b32f84bafa580aad89b011259019"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/stretchr/objx"
@@ -86,10 +86,10 @@
   version = "v1.2.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/urfave/negroni"
   packages = ["."]
-  revision = "079cf0c7a6b0145ebcf4103ec90380370cd89917"
+  revision = "5dbbc83f748fc3ad38585842b0aedab546d0ea1e"
+  version = "v0.3.0"
 
 [[projects]]
   name = "github.com/zebresel-com/mongodm"
@@ -101,7 +101,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["pbkdf2"]
-  revision = "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
+  revision = "4ec37c66abab2c7e02ae775328b2ff001c3f025a"
 
 [[projects]]
   branch = "v2"
@@ -112,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "171066728d2ff82b869c356d4de884b7f0dc215ff9c15eda421e65e38d3fceb3"
+  inputs-digest = "ade26819929c44f6f84d1b3cbef5fc26239e79aa3d3591cd70fbe112ea1ef47d"
   solver-name = "gps-cdcl"
   solver-version = 1
