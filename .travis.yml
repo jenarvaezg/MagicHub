@@ -28,6 +28,8 @@ before_script:
 # script always run to completion (set +e). All of these code checks are must haves
 # in a modern Go project.
 script:
+  - ls -Rl
+  - echo $GOPATH
   - go build -v ./...
   - go install -v ./...
   - go test -v -race ./...                   # Run all the tests with the race detector enabled
