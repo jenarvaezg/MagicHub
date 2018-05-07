@@ -5,6 +5,7 @@ go:
 
 go_import_path: github.com/jenarvaezg/MagicHub
 
+install: true
 
 addons:
   apt:
