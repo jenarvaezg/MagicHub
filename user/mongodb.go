@@ -1,10 +1,11 @@
 package user
 
 import (
-	"github.com/jenarvaezg/MagicHub/db"
 	"github.com/zebresel-com/mongodm"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+
+	"github.com/jenarvaezg/MagicHub/db"
 )
 
 const collectionName = "user"
