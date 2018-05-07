@@ -11,7 +11,7 @@ import (
 
 const (
 	// DatabaseName holds the name of the database
-	DatabaseName = "magicbox"
+	DatabaseName = "magichub"
 )
 
 func getLocalsMap() map[string]map[string]string {

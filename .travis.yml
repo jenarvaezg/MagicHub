@@ -21,7 +21,7 @@ notifications:
 # flunk the build and immediately stop. It's sorta like having
 # set -e enabled in bash.
 before_script:
-  - MAGICBOX_VERSION=$(cat version.txt)
+  - MAGICHUB_VERSION=$(cat version.txt)
   - go get github.com/golang/lint/golint                        # Linter
   - go get honnef.co/go/tools/cmd/megacheck                     # Badass static analyzer/linter
 
@@ -38,9 +38,9 @@ after_success:
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     ./build_image.sh;
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push jenarvaezg/magicbox:$MAGICBOX_VERSION;
+    docker push jenarvaezg/magichub:$MAGICHUB_VERSION;
     fi
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
     echo Deploying;
-    sshpass -p "$MAGICBOX_BACKEND_PASSWORD" ssh -o "StrictHostKeyChecking no" -y $MAGICBOX_BACKEND_USER@$MAGICBOX_BACKEND_URL ./restart.sh;
+    sshpass -p "$MAGICHUB_BACKEND_PASSWORD" ssh -o "StrictHostKeyChecking no" -y $MAGICHUB_BACKEND_USER@$MAGICHUB_BACKEND_URL ./restart.sh;
     fi
