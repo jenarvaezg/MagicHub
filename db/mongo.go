@@ -27,8 +27,13 @@ func getLocalsMap() map[string]map[string]string {
 	return localMap
 }
 
+var conn *mongodm.Connection
+
 // GetMongoConnection returns a mongodm connection to a mongodb database
 func GetMongoConnection() *mongodm.Connection {
+	if conn != nil {
+		return conn
+	}
 	var err error
 
 	mongoURL := os.Getenv("MONGO_URL")
@@ -48,5 +53,7 @@ func GetMongoConnection() *mongodm.Connection {
 		log.Panicf("Database connection error: %v", err)
 	}
 
-	return connection
+	conn = connection
+
+	return conn
 }

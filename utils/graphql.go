@@ -1,10 +1,6 @@
 package utils
 
 import (
-	"context"
-	"log"
-	"os/user"
-
 	"github.com/graphql-go/graphql"
 )
 
@@ -46,16 +42,4 @@ func MergeGraphQLFields(grapqhQLFields ...graphql.Fields) graphql.Fields {
 	}
 
 	return mergedFields
-}
-
-// RequireUser returns user from http context or panics if not found
-func RequireUser(c context.Context) *user.User {
-	user, _ := c.Value(ContextKeyCurrentUser).(*user.User)
-
-	if user == nil {
-		log.Println("Require user got", c.Value(ContextKeyCurrentUser))
-		panic("User not authenticated")
-	}
-
-	return user
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jenarvaezg/MagicHub/user"
 )
@@ -34,20 +35,20 @@ func (s *service) GetAuthTokenByProvider(inToken, provider string) (outToken *To
 		return nil, fmt.Errorf("Provider %s is not supported", provider)
 	}
 
-	user, err := authProvider.GetUserFromToken(inToken)
+	tokenUser, err := authProvider.GetUserFromToken(inToken)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err = s.userService.FindByEmail(user.Email)
+	log.Println(tokenUser.LastName)
+	user, err := s.userService.FindByEmail(tokenUser.Email)
+	log.Println(user.LastName)
 	if err != nil {
-		user, err = s.userService.CreateUser(user.Username, user.Email, user.FirstName, user.LastName, user.ImageURL)
+		user, err = s.userService.CreateUser(tokenUser.Username, tokenUser.Email, tokenUser.FirstName, tokenUser.LastName, tokenUser.ImageURL)
 		if err != nil {
 			return nil, err
 		}
 	}
-	// TODO update user data from google
 
-	outToken, err = generateToken(user)
-	return outToken, err
+	return generateToken(user)
 }

@@ -2,8 +2,8 @@ package user
 
 import (
 	"github.com/graphql-go/graphql"
+
 	"github.com/jenarvaezg/MagicHub/interfaces"
-	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 type controller struct {
@@ -32,7 +32,7 @@ var UType = graphql.NewObject(graphql.ObjectConfig{
 	Fields: graphql.Fields{
 		"id": &graphql.Field{Type: graphql.String, Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 			user := p.Source.(*User)
-			return user.ID.Hex(), nil
+			return user.GetId().Hex(), nil
 		}},
 		"email":     &graphql.Field{Type: graphql.String},
 		"firstName": &graphql.Field{Type: graphql.String},
@@ -49,7 +49,7 @@ func (c *controller) getUserQuery() *graphql.Field {
 			"id": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.ID), Description: "User ID"},
 		},
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			utils.RequireUser(p.Context)
+			RequireUser(p.Context)
 			id := p.Args["id"].(string)
 			return c.service.FindByID(id)
 		},

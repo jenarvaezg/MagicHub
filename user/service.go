@@ -39,7 +39,6 @@ func (s *service) FindByEmail(email string) (*User, error) {
 	} else if len(users) == 0 {
 		return nil, fmt.Errorf("FindByEmail: User with email %s not found", email)
 	}
-
 	return users[0], nil
 
 }

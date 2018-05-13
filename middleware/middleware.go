@@ -1,37 +1,17 @@
 package middleware
 
 import (
-	"context"
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/mux"
 	"github.com/jenarvaezg/MagicHub/auth"
-	"github.com/jenarvaezg/MagicHub/models"
-	"github.com/jenarvaezg/MagicHub/utils"
+	"github.com/jenarvaezg/MagicHub/user"
 )
-
-//RequireBoxMiddleware is a middleware that ensures a url's id parameter is a valid ID related to a Box document
-type RequireBoxMiddleware struct {
-}
-
-//RequireUserMiddleware is a middleware that ensures a url's id parameter is a valid ID related to a User document
-type RequireUserMiddleware struct {
-}
 
 //UserFromJWTMiddleware is a middleware that varifies a JWT in the Authorization header and sets the user in the conext
 type UserFromJWTMiddleware struct {
-}
-
-// NewRequireBoxMiddleware returns a RequireBoxMiddleware
-func NewRequireBoxMiddleware() *RequireBoxMiddleware {
-	return &RequireBoxMiddleware{}
-}
-
-// NewRequireUserMiddleware returns a RequireUserMiddleware
-func NewRequireUserMiddleware() *RequireUserMiddleware {
-	return &RequireUserMiddleware{}
 }
 
 // NewUserFromJWTMiddleware returns a RequireUserMiddleware
@@ -39,59 +19,9 @@ func NewUserFromJWTMiddleware() *UserFromJWTMiddleware {
 	return &UserFromJWTMiddleware{}
 }
 
-// ContextKey is //TODO
-type ContextKey string
-
-//ContextKeyCurrentUser is a key used for indexing a user in a context
-var ContextKeyCurrentUser = ContextKey("current-user")
-
-func getBox(r *http.Request) (models.Box, error) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	return models.GetBoxByID(id)
-}
-
-/*
-RequireBoxMiddleware's handler, which asserts that url's id parameter is a valid ID and is related to a Box
-document in the database
-*/
-func (l *RequireBoxMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	box, err := getBox(r)
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyBox, box))
-
-	next(w, r)
-}
-
-func getUser(r *http.Request) (models.User, error) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	return models.GetUserByID(id)
-}
-
-/*
-RequireUserMiddleware's handler, which asserts that url's id parameter is a valid ID and is related to a User
-document in the database
-*/
-func (l *RequireUserMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	user, err := getUser(r)
-	if err != nil {
-		utils.ResponseError(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	r = r.WithContext(context.WithValue(r.Context(), utils.ContextKeyUser, user))
-
-	next(w, r)
-}
-
 func extractJWTFromHeader(authHeader string) (string, error) {
 	if authHeader == "" {
-		return "", errors.New("Missing Authorization header") // No error, just no token
+		return "", errors.New("Missing Authorization header")
 	}
 
 	authHeaderParts := strings.Split(authHeader, " ")
@@ -106,19 +36,19 @@ func extractJWTFromHeader(authHeader string) (string, error) {
 UserFromJWTMiddleware's handler, extracts JWT from auth header, validates JWT and inserts user in the request context
 */
 func (l *UserFromJWTMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-
 	token, err := extractJWTFromHeader(r.Header.Get("Authorization"))
 	if err != nil {
 		next(w, r)
 		return
 	}
 
-	user, err := auth.GetUserFromToken(token)
+	u, err := auth.GetUserFromToken(token)
 	if err != nil {
+		log.Println(u, err)
 		next(w, r)
 		return
 	}
 
-	r = r.WithContext(context.WithValue(r.Context(), ContextKeyCurrentUser, user))
+	r = r.WithContext(user.StoreUserIDInContext(r.Context(), u.GetId()))
 	next(w, r)
 }
