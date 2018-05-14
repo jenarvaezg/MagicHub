@@ -38,15 +38,19 @@ func (s *service) CreateTeam(creatorID bson.ObjectId, name, image, description s
 	team.Members = []interface{}{creatorID}
 	team.Admins = []interface{}{creatorID}
 
-	_, err := s.repo.Store(team)
+	if _, err := s.repo.Store(team); err != nil {
+		return nil, err
+	}
 
-	return team, err
+	return team, nil
 }
 
 // GetTeamByID returns a team by its ID or error if not found
 func (s *service) GetTeamByID(id string) (*models.Team, error) {
-
-	return s.repo.FindByID(bson.ObjectId(id))
+	if !bson.IsObjectIdHex(id) {
+		return nil, fmt.Errorf("%s is not a valid ID", id)
+	}
+	return s.repo.FindByID(bson.ObjectIdHex(id))
 }
 
 // GetTeamMembers returns the list of members that belong to a team or an error if the user is not in the team

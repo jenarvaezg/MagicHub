@@ -12,4 +12,4 @@ done
 for pid in ${pids[*]}; do
     wait $pid
 done
-echo
+echo DONE
