@@ -10,8 +10,9 @@ import (
 )
 
 type controller struct {
-	repo    Repository
-	service Service
+	service interfaces.BoxService
+	types   map[string]graphql.Output
+	fields  map[string]*graphql.Field
 }
 
 type listResult struct {
@@ -19,10 +20,21 @@ type listResult struct {
 	TotalCount int           `json:"totalCount"`
 }
 
+var boxListQuery *graphql.Field
+var boxType *graphql.Object
+
 // NewGraphQLController returns a GraphQLController
-func NewGraphQLController(repo Repository, service Service) interfaces.GraphQLController {
-	c := &controller{repo: repo, service: service}
-	c.setBListField()
+func NewGraphQLController(service interfaces.BoxService, r interfaces.Registry) interfaces.GraphQLController {
+	c := &controller{service: service}
+	c.setFields()
+
+	c.types = make(map[string]graphql.Output)
+	c.fields = make(map[string]*graphql.Field)
+
+	c.types["box"] = boxType
+	c.fields["boxList"] = boxListQuery
+
+	r.RegisterController(c, "box")
 	return c
 }
 
@@ -32,7 +44,7 @@ func (c *controller) GetQueries() graphql.Fields {
 
 func (c *controller) GetMutations() graphql.Fields {
 	var createBoxMutation = &graphql.Field{
-		Type: BType,
+		Type: c.GetOutputType("box"),
 		Args: graphql.FieldConfigArgument{
 			"teamID":   &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.ID), Description: "Team ID for this box"},
 			"name":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String), Description: "Box name"},
@@ -44,11 +56,31 @@ func (c *controller) GetMutations() graphql.Fields {
 	return graphql.Fields{"createBox": createBoxMutation}
 }
 
-// BListField is a list of boxes for a given project
-var BListField *graphql.Field
+func (c controller) GetOutputType(name string) graphql.Output {
+	return c.types[name]
+}
 
-func (c *controller) setBListField() {
-	BListField = utils.MakeListField(utils.MakeNodeListType("BoxList", BType), c.queryBoxesFromProject, true)
+func (c controller) GetField(name string) *graphql.Field {
+	return c.fields[name]
+}
+
+func (c *controller) OnAllControllersRegistered(r interfaces.Registry) {
+	// TODO fields stuff
+}
+
+func (c *controller) setFields() {
+	boxType = c.boxType()
+	boxListQuery = utils.MakeListField(utils.MakeNodeListType("BoxList", boxType), c.queryBoxesFromProject, true)
+}
+
+func (c *controller) boxType() *graphql.Object {
+	return graphql.NewObject(graphql.ObjectConfig{
+		Name:        "Box",
+		Description: "A box is a magicbox of MagicHub",
+		Fields: graphql.Fields{
+			"name": &graphql.Field{Type: graphql.String},
+		},
+	})
 }
 
 func (c *controller) queryBoxesFromProject(p graphql.ResolveParams) (interface{}, error) {
@@ -73,12 +105,3 @@ func (c *controller) createBox(p graphql.ResolveParams) (interface{}, error) {
 
 	return nil, nil
 }
-
-// BType is the type that holds a box for GraphQL
-var BType = graphql.NewObject(graphql.ObjectConfig{
-	Name:        "Box",
-	Description: "A box is a magicbox of MagicHub",
-	Fields: graphql.Fields{
-		"name": &graphql.Field{Type: graphql.String},
-	},
-})

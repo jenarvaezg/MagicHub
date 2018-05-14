@@ -9,7 +9,8 @@ import (
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/jenarvaezg/MagicHub/user"
+	"github.com/jenarvaezg/MagicHub/interfaces"
+	"github.com/jenarvaezg/MagicHub/models"
 	"github.com/mendsley/gojwk"
 )
 
@@ -22,10 +23,10 @@ const (
 type googleToken = string
 
 type googleAuthProvider struct {
-	userService user.Service
+	userService interfaces.UserService
 }
 
-func newGoogleAuthProvider(userService user.Service) authProvider {
+func newGoogleAuthProvider(userService interfaces.UserService) authProvider {
 	return &googleAuthProvider{userService: userService}
 }
 
@@ -70,7 +71,7 @@ func parseToken(googleToken googleToken) (*jwt.Token, error) {
 	})
 }
 
-func (p *googleAuthProvider) GetUserFromToken(token string) (*user.User, error) {
+func (p *googleAuthProvider) GetUserFromToken(token string) (*models.User, error) {
 	parsedToken, err := parseToken(googleToken(token))
 	if err != nil {
 		return nil, err
@@ -85,8 +86,8 @@ func (p *googleAuthProvider) GetUserFromToken(token string) (*user.User, error) 
 	return userFromClaims(claims), nil
 }
 
-func userFromClaims(claims jwt.MapClaims) *user.User {
-	return &user.User{
+func userFromClaims(claims jwt.MapClaims) *models.User {
+	return &models.User{
 		Username:  strings.Split(claims["email"].(string), "@")[0],
 		Email:     claims["email"].(string),
 		FirstName: claims["given_name"].(string),

@@ -1,8 +1,9 @@
 package team
 
 import (
+	"log"
+
 	"github.com/graphql-go/graphql"
-	"github.com/jenarvaezg/MagicHub/box"
 	"github.com/jenarvaezg/MagicHub/interfaces"
 	"github.com/jenarvaezg/MagicHub/models"
 	"github.com/jenarvaezg/MagicHub/user"
@@ -15,22 +16,32 @@ type listResult struct {
 }
 
 type controller struct {
-	repo       Repository
-	service    Service
-	boxService box.Service
+	service interfaces.TeamService
+	types   map[string]graphql.Output
+	fields  map[string]*graphql.Field
 }
 
+var teamType *graphql.Object
+var teamListQuery *graphql.Field
+var teamByIDQuery *graphql.Field
+
 // NewGraphQLController returns a GraphQLController
-func NewGraphQLController(repo Repository, service Service, boxService box.Service) interfaces.GraphQLController {
-	c := &controller{repo: repo, service: service, boxService: boxService}
-	c.setTeamType()
+func NewGraphQLController(service interfaces.TeamService, r interfaces.Registry) interfaces.GraphQLController {
+	c := &controller{service: service}
+	c.types = make(map[string]graphql.Output)
+	c.fields = make(map[string]*graphql.Field)
+	c.setTypes()
+
+	c.types["team"] = teamType
+	c.fields["teamList"] = teamListQuery
+	c.fields["teamByID"] = teamByIDQuery
+
+	r.RegisterController(c, "team")
 	return c
 }
 
 func (c *controller) GetQueries() graphql.Fields {
-	teamsQuery := utils.MakeListField(utils.MakeNodeListType("TeamList", teamType), c.queryTeams, true)
-	teamByIDQuery := c.getTeamQuery()
-	return graphql.Fields{"teams": teamsQuery, "team": teamByIDQuery}
+	return graphql.Fields{"teams": teamListQuery, "team": teamByIDQuery}
 }
 
 func (c *controller) GetMutations() graphql.Fields {
@@ -41,13 +52,57 @@ func (c *controller) GetMutations() graphql.Fields {
 			"image":       &graphql.ArgumentConfig{Type: graphql.String, Description: "Path to image of team"},
 			"description": &graphql.ArgumentConfig{Type: graphql.String, Description: "Short description of team"},
 		},
-		Resolve: c.createTeam,
+		Resolve: c.createTeamResolver,
 	}
 
 	return graphql.Fields{"createTeam": createTeamMutation}
 }
 
-func (c *controller) queryTeams(p graphql.ResolveParams) (interface{}, error) {
+func (c *controller) GetField(name string) *graphql.Field {
+	return c.fields[name]
+}
+
+func (c *controller) GetOutputType(name string) graphql.Output {
+	return c.types[name]
+}
+
+func (c *controller) OnAllControllersRegistered(r interfaces.Registry) {
+	userController := r.GetController("user").(interfaces.GraphQLController)
+	boxController := r.GetController("box").(interfaces.GraphQLController)
+
+	userType := userController.GetOutputType("user")
+	boxListField := boxController.GetField("boxList")
+
+	teamType.AddFieldConfig("members", &graphql.Field{
+		Type: graphql.NewList(userType),
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			userID := user.RequireUser(p.Context)
+			team := p.Source.(*models.Team)
+			return c.service.GetTeamMembers(userID, team)
+		},
+	})
+
+	teamType.AddFieldConfig("admins", &graphql.Field{
+		Type: graphql.NewList(userType),
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			userID := user.RequireUser(p.Context)
+			team := p.Source.(*models.Team)
+			return c.service.GetTeamAdmins(userID, team)
+		},
+	})
+
+	log.Println(boxListField)
+	teamType.AddFieldConfig("boxes", boxListField)
+
+}
+
+func (c *controller) setTypes() {
+	teamType = c.teamType()
+	teamByIDQuery = c.getTeamQuery()
+	teamListQuery = utils.MakeListField(utils.MakeNodeListType("TeamList", teamType), c.teamListQuery, true)
+}
+
+func (c *controller) teamListQuery(p graphql.ResolveParams) (interface{}, error) {
 	user.RequireUser(p.Context)
 	limit, _ := p.Args["limit"].(int)
 	offset, _ := p.Args["offset"].(int)
@@ -75,7 +130,7 @@ func (c *controller) getTeamQuery() *graphql.Field {
 	}
 }
 
-func (c *controller) createTeam(p graphql.ResolveParams) (interface{}, error) {
+func (c *controller) createTeamResolver(p graphql.ResolveParams) (interface{}, error) {
 	userID := user.RequireUser(p.Context)
 	name, _ := p.Args["name"].(string)
 	image, _ := p.Args["image"].(string)
@@ -84,10 +139,8 @@ func (c *controller) createTeam(p graphql.ResolveParams) (interface{}, error) {
 	return c.service.CreateTeam(userID, name, image, description)
 }
 
-var teamType *graphql.Object
-
-func (c *controller) setTeamType() {
-	teamType = graphql.NewObject(graphql.ObjectConfig{
+func (c *controller) teamType() *graphql.Object {
+	return graphql.NewObject(graphql.ObjectConfig{
 		Name:        "Team",
 		Description: "A team is the base organizational level, holds stuff like users, boxes, etc...",
 		Fields: graphql.Fields{
@@ -103,17 +156,6 @@ func (c *controller) setTeamType() {
 				team := p.Source.(*models.Team)
 				return c.service.GetTeamMembersCount(team)
 			}},
-			"members": &graphql.Field{Type: graphql.NewList(user.UType), Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				userID := user.RequireUser(p.Context)
-				team := p.Source.(*models.Team)
-				return c.service.GetTeamMembers(userID, team)
-			}},
-			"admins": &graphql.Field{Type: graphql.NewList(user.UType), Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				userID := user.RequireUser(p.Context)
-				team := p.Source.(*models.Team)
-				return c.service.GetTeamAdmins(userID, team)
-			}},
-			"boxes": box.BListField,
 		},
 	})
 }

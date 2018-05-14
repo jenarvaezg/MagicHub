@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/jenarvaezg/MagicHub/interfaces"
+
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 	"github.com/rs/cors"
@@ -12,6 +14,7 @@ import (
 	"github.com/jenarvaezg/MagicHub/auth"
 	"github.com/jenarvaezg/MagicHub/box"
 	"github.com/jenarvaezg/MagicHub/middleware"
+	"github.com/jenarvaezg/MagicHub/registry"
 	"github.com/jenarvaezg/MagicHub/team"
 	"github.com/jenarvaezg/MagicHub/user"
 	"github.com/jenarvaezg/MagicHub/utils"
@@ -21,14 +24,18 @@ const (
 	defaultPort string = "8000"
 )
 
-func getGraphQLSchema() *graphql.Schema {
-	boxRepo := box.NewMongoRepository()
-	boxController := box.NewGraphQLController(boxRepo, box.NewService(boxRepo))
-	teamRepo := team.NewMongoRepository()
-	teamController := team.NewGraphQLController(teamRepo, team.NewService(teamRepo), box.NewService(boxRepo))
-	userRepo := user.NewMongoRepository()
-	userController := user.NewGraphQLController(userRepo, user.NewService(userRepo))
-	authController := auth.NewGraphQLController(auth.NewService(user.NewService(userRepo)))
+func getGraphQLSchema(r interfaces.Registry) *graphql.Schema {
+	boxService := box.NewService(box.NewMongoRepository(), r)
+	userService := user.NewService(user.NewMongoRepository(), r)
+	teamService := team.NewService(team.NewMongoRepository(), r)
+	authService := auth.NewService(r)
+	r.AllServicesRegistered()
+
+	boxController := box.NewGraphQLController(boxService, r)
+	teamController := team.NewGraphQLController(teamService, r)
+	userController := user.NewGraphQLController(userService, r)
+	authController := auth.NewGraphQLController(authService, r)
+	r.AllControllersRegistered()
 
 	queryFields := utils.MergeGraphQLFields(
 		teamController.GetQueries(),
@@ -71,7 +78,7 @@ func main() {
 	mux := http.NewServeMux()
 	middlewareRouter := getCommonMiddleware()
 	graphHandler := handler.New(&handler.Config{
-		Schema: getGraphQLSchema(),
+		Schema: getGraphQLSchema(registry.NewRegistry()),
 		Pretty: true,
 	})
 	mux.Handle("/graphql", graphHandler)

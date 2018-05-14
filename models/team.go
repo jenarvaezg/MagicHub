@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/jenarvaezg/MagicHub/user"
 	"github.com/zebresel-com/mongodm"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -20,7 +19,7 @@ type Team struct {
 // IsUserMember resturn a boolean that determines wheter a userID is in the team members list
 func (t Team) IsUserMember(userID bson.ObjectId) bool {
 
-	for _, m := range t.Members.([]*user.User) {
+	for _, m := range t.Members.([]*User) {
 		if userID == m.GetId() {
 			return true
 		}

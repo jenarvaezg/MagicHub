@@ -4,16 +4,23 @@ import (
 	"github.com/graphql-go/graphql"
 
 	"github.com/jenarvaezg/MagicHub/interfaces"
+	"github.com/jenarvaezg/MagicHub/models"
 )
 
 type controller struct {
-	repo    Repository
-	service Service
+	service interfaces.UserService
+	types   map[string]graphql.Output
+	fields  map[string]*graphql.Field
 }
 
 // NewGraphQLController returns a GraphQLController
-func NewGraphQLController(repo Repository, service Service) interfaces.GraphQLController {
-	return &controller{repo: repo, service: service}
+func NewGraphQLController(service interfaces.UserService, r interfaces.Registry) interfaces.GraphQLController {
+	c := &controller{service: service}
+	c.types = make(map[string]graphql.Output)
+	c.types["user"] = userType
+
+	r.RegisterController(c, "user")
+	return c
 }
 
 func (c *controller) GetQueries() graphql.Fields {
@@ -21,17 +28,25 @@ func (c *controller) GetQueries() graphql.Fields {
 }
 
 func (c *controller) GetMutations() graphql.Fields {
-
 	return graphql.Fields{}
 }
 
-// UType is the type that holds a user for GraphQL
-var UType = graphql.NewObject(graphql.ObjectConfig{
+func (c controller) GetOutputType(name string) graphql.Output {
+	return c.types[name]
+}
+
+func (c controller) GetField(name string) *graphql.Field {
+	return nil
+}
+
+func (c *controller) OnAllControllersRegistered(sr interfaces.Registry) {}
+
+var userType = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "User",
 	Description: "A user is an user of MagicHub",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{Type: graphql.String, Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			user := p.Source.(*User)
+			user := p.Source.(*models.User)
 			return user.GetId().Hex(), nil
 		}},
 		"email":     &graphql.Field{Type: graphql.String},
@@ -44,7 +59,7 @@ var UType = graphql.NewObject(graphql.ObjectConfig{
 
 func (c *controller) getUserQuery() *graphql.Field {
 	return &graphql.Field{
-		Type: UType,
+		Type: c.GetOutputType("user"),
 		Args: graphql.FieldConfigArgument{
 			"id": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.ID), Description: "User ID"},
 		},

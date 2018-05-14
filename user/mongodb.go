@@ -8,6 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/jenarvaezg/MagicHub/db"
+	"github.com/jenarvaezg/MagicHub/models"
 )
 
 const collectionName = "user"
@@ -19,7 +20,7 @@ type repo struct {
 // NewMongoRepository returns a object that implements the repository interface using mongodb
 func NewMongoRepository() Repository {
 	connection := db.GetMongoConnection()
-	connection.Register(&User{}, collectionName)
+	connection.Register(&models.User{}, collectionName)
 	index := mgo.Index{
 		Key:    []string{"email"},
 		Unique: true,
@@ -30,7 +31,7 @@ func NewMongoRepository() Repository {
 }
 
 // Store saves a user to mongodb and returns a pointer to the team with updated fields
-func (r *repo) Store(u *User) (bson.ObjectId, error) {
+func (r *repo) Store(u *models.User) (bson.ObjectId, error) {
 	model := r.getModel()
 
 	model.New(u)
@@ -42,9 +43,9 @@ func (r *repo) Store(u *User) (bson.ObjectId, error) {
 }
 
 // FindByID returns a matching team by ID or error if not found
-func (r *repo) FindByID(id bson.ObjectId) (*User, error) {
+func (r *repo) FindByID(id bson.ObjectId) (*models.User, error) {
 	model := r.getModel()
-	user := &User{}
+	user := &models.User{}
 
 	if err := model.FindId(id).Exec(user); err != nil {
 		return nil, err
@@ -54,9 +55,9 @@ func (r *repo) FindByID(id bson.ObjectId) (*User, error) {
 }
 
 // FindBy returns a list of Users y the provided fields or error if there is a problem
-func (r *repo) FindBy(findMap map[string]interface{}) ([]*User, error) {
+func (r *repo) FindBy(findMap map[string]interface{}) ([]*models.User, error) {
 	model := r.getModel()
-	users := []*User{}
+	users := []*models.User{}
 
 	log.Println(findMap)
 	err := model.Find(findMap).Exec(&users)

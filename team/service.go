@@ -4,29 +4,21 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jenarvaezg/MagicHub/interfaces"
 	"github.com/jenarvaezg/MagicHub/models"
-	"github.com/jenarvaezg/MagicHub/user"
 	"gopkg.in/mgo.v2/bson"
 )
-
-// Service is a interface of all the methods required to be an interface for Team
-type Service interface {
-	GetRouteNameFromName(string) string
-	FindFiltered(limit, offset int, search string) ([]*models.Team, error)
-	CreateTeam(userID bson.ObjectId, name, image, description string) (*models.Team, error)
-	GetTeamByID(id string) (*models.Team, error)
-	GetTeamMembers(userID bson.ObjectId, team *models.Team) ([]*user.User, error)
-	GetTeamMembersCount(team *models.Team) (int, error)
-	GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([]*user.User, error)
-}
 
 type service struct {
 	repo Repository
 }
 
 // NewService returns an object that implements the Service interface
-func NewService(repo Repository) Service {
-	return &service{repo}
+func NewService(repo Repository, r interfaces.Registry) interfaces.TeamService {
+	s := &service{repo: repo}
+
+	r.RegisterService(s, "team")
+	return s
 }
 
 // GetRouteNameFromName returns a route name from a name
@@ -58,22 +50,26 @@ func (s *service) GetTeamByID(id string) (*models.Team, error) {
 }
 
 // GetTeamMembers returns the list of members that belong to a team or an error if the user is not in the team
-func (s *service) GetTeamMembers(userID bson.ObjectId, team *models.Team) ([]*user.User, error) {
+func (s *service) GetTeamMembers(userID bson.ObjectId, team *models.Team) ([]*models.User, error) {
 	if team.IsUserMember(userID) {
-		return team.Members.([]*user.User), nil
+		return team.Members.([]*models.User), nil
 	}
 	return nil, fmt.Errorf("you must be in the team to see members")
 }
 
 // GetTeamMembersCount returns number members that belong to a team or an error if the user is not in the team
 func (s *service) GetTeamMembersCount(team *models.Team) (int, error) {
-	return len(team.Members.([]*user.User)), nil
+	return len(team.Members.([]*models.User)), nil
 }
 
 // user returns the list of admin that belong to a team or an error if the user is not in the team
-func (s *service) GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([]*user.User, error) {
+func (s *service) GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([]*models.User, error) {
 	if team.IsUserMember(userID) {
-		return team.Members.([]*user.User), nil
+		return team.Members.([]*models.User), nil
 	}
 	return nil, fmt.Errorf("you must be in the team to see admins")
+}
+
+func (s *service) OnAllServicesRegistered(r interfaces.Registry) {
+	// As of now Team service does not need other services
 }
