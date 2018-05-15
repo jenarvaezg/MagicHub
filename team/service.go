@@ -10,7 +10,8 @@ import (
 )
 
 type service struct {
-	repo Repository
+	repo        Repository
+	teamService interfaces.TeamService
 }
 
 // NewService returns an object that implements the Service interface
@@ -66,7 +67,7 @@ func (s *service) GetTeamMembersCount(team *models.Team) (int, error) {
 	return len(team.Members.([]*models.User)), nil
 }
 
-// user returns the list of admin that belong to a team or an error if the user is not in the team
+// GetTeamAdmins returns the list of admins that belong to a team or an error if the user is not in the team
 func (s *service) GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([]*models.User, error) {
 	if team.IsUserMember(userID) {
 		return team.Members.([]*models.User), nil
@@ -74,6 +75,7 @@ func (s *service) GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([]*mod
 	return nil, fmt.Errorf("you must be in the team to see admins")
 }
 
+// OnAllServicesRegistered is the method called when all services are registered, used to get dependencies in execution time
 func (s *service) OnAllServicesRegistered(r interfaces.Registry) {
-	// As of now Team service does not need other services
+	s.teamService = r.GetService("team").(interfaces.TeamService)
 }

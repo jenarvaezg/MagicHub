@@ -150,3 +150,113 @@ func TestGetTeamByID(t *testing.T) {
 		})
 	}
 }
+
+func TestGetTeamMembers(t *testing.T) {
+	t.Parallel()
+	currentUserID := bson.NewObjectId()
+	currentUser, otherUser := &models.User{}, &models.User{}
+	currentUser.SetId(currentUserID)
+	usersWithCurrentUser := []*models.User{currentUser, otherUser}
+	theTeam := &models.Team{Admins: usersWithCurrentUser, Members: usersWithCurrentUser}
+
+	var testCases = []struct {
+		testName      string
+		currentUserId bson.ObjectId
+		expected      []*models.User
+		err           error
+	}{
+		{"User in member list and found", currentUserID, usersWithCurrentUser, nil},
+		{"User not in member list", bson.NewObjectId(), nil, errors.New("you must be in the team to see members")},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			mockRepository := new(mocks.Repository)
+			r := registry.NewRegistry()
+
+			service := team.NewService(mockRepository, r)
+			result, err := service.GetTeamMembers(tc.currentUserId, theTeam)
+
+			assert.Equal(t, tc.expected, result)
+			assert.Equal(t, tc.err, err)
+
+		})
+	}
+}
+
+func TestGetTeamMembersCount(t *testing.T) {
+	t.Parallel()
+
+	var testCases = []struct {
+		testName string
+		users    []*models.User
+		expected int
+		err      error
+	}{
+		{"Some users in team", []*models.User{&models.User{}, &models.User{}, &models.User{}}, 3, nil},
+		{"No users in team", []*models.User{}, 0, nil},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			mockRepository := new(mocks.Repository)
+			r := registry.NewRegistry()
+			theTeam := &models.Team{Members: tc.users}
+
+			service := team.NewService(mockRepository, r)
+			result, err := service.GetTeamMembersCount(theTeam)
+
+			assert.Equal(t, tc.expected, result)
+			assert.Equal(t, tc.err, err)
+
+		})
+	}
+}
+
+func TestGetTeamAdmins(t *testing.T) {
+	t.Parallel()
+	currentUserID := bson.NewObjectId()
+	currentUser, otherUser := &models.User{}, &models.User{}
+	currentUser.SetId(currentUserID)
+	usersWithCurrentUser := []*models.User{currentUser, otherUser}
+	admins := []*models.User{currentUser}
+	theTeam := &models.Team{Admins: admins, Members: usersWithCurrentUser}
+
+	var testCases = []struct {
+		testName      string
+		currentUserId bson.ObjectId
+		expected      []*models.User
+		err           error
+	}{
+		{"User in member list and found", currentUserID, usersWithCurrentUser, nil},
+		{"User not in member list", bson.NewObjectId(), nil, errors.New("you must be in the team to see admins")},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			mockRepository := new(mocks.Repository)
+			r := registry.NewRegistry()
+
+			service := team.NewService(mockRepository, r)
+			result, err := service.GetTeamAdmins(tc.currentUserId, theTeam)
+
+			assert.Equal(t, tc.expected, result)
+			assert.Equal(t, tc.err, err)
+
+		})
+	}
+}
+
+func TestOnAllServicesRegistered(t *testing.T) {
+	mockRepository := new(mocks.Repository)
+	mockTeamService := new(interfaceMocks.TeamService)
+	mockRegistry := new(interfaceMocks.Registry)
+	mockRegistry.On("RegisterService", mock.Anything, "team")
+	mockRegistry.On("GetService", "team").Return(mockTeamService)
+
+	service := team.NewService(mockRepository, mockRegistry)
+	service.OnAllServicesRegistered(mockRegistry)
+
+	mockRegistry.AssertExpectations(t)
+
+}
