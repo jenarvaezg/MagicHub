@@ -34,6 +34,29 @@ func (_m *TeamService) CreateTeam(userID bson.ObjectId, name string, image strin
 	return r0, r1
 }
 
+// FindByID provides a mock function with given fields: id
+func (_m *TeamService) FindByID(id string) (*models.Team, error) {
+	ret := _m.Called(id)
+
+	var r0 *models.Team
+	if rf, ok := ret.Get(0).(func(string) *models.Team); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Team)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindFiltered provides a mock function with given fields: limit, offset, search
 func (_m *TeamService) FindFiltered(limit int, offset int, search string) ([]*models.Team, error) {
 	ret := _m.Called(limit, offset, search)
@@ -87,29 +110,6 @@ func (_m *TeamService) GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([
 	var r1 error
 	if rf, ok := ret.Get(1).(func(bson.ObjectId, *models.Team) error); ok {
 		r1 = rf(userID, team)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// FindByID provides a mock function with given fields: id
-func (_m *TeamService) FindByID(id string) (*models.Team, error) {
-	ret := _m.Called(id)
-
-	var r0 *models.Team
-	if rf, ok := ret.Get(0).(func(string) *models.Team); ok {
-		r0 = rf(id)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.Team)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}

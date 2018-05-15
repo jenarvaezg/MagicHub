@@ -22,6 +22,7 @@ notifications:
 # set -e enabled in bash.
 before_script:
   - MAGICHUB_VERSION=$(cat version.txt)
+  - MOCK_FILES=$(find ./**/ | grep mocks | grep .go | sed 's/\.\///g' | tr '\n' ',' | sed 's/.$//')
   - go get github.com/golang/lint/golint                        # Linter
   - go get honnef.co/go/tools/cmd/megacheck                     # Badass static analyzer/linter
   - go get github.com/mattn/goveralls                           # coveralls golang helper
@@ -33,7 +34,7 @@ script:
   - go vet ./...                             # go vet is the official Go static analyzer
   - megacheck ./...                          # "go vet on steroids" + linter
   - golint -set_exit_status $(go list ./...) # one last linter
-  - goveralls -service=travis-ci
+  - goveralls -ignore=$MOCK_FILES -service=travis-ci
 
 after_success:
   - echo $TRAVIS_BRANCH;

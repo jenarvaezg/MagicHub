@@ -126,15 +126,6 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-// // CreateUser creates a user :)
-// func (s *service) CreateUser(username, email, firstName, lastName, imageURL string) (*models.User, error) {
-// 	user := &models.User{Username: username, Email: email, FirstName: firstName, LastName: lastName, ImageURL: imageURL}
-
-// 	_, err := s.repo.Store(user)
-
-// 	return user, err
-// }
-
 func TestOnAllServicesRegistered(t *testing.T) {
 	t.Parallel()
 	mockRepository := new(mocks.Repository)
