@@ -14,24 +14,6 @@
   version = "v3.2.0"
 
 [[projects]]
-  name = "github.com/go-bongo/bongo"
-  packages = ["."]
-  revision = "58e3a1fbb5ea15dde8675b60becb2a9950e70164"
-  version = "v0.10.4"
-
-[[projects]]
-  name = "github.com/gorilla/context"
-  packages = ["."]
-  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
-  version = "v1.1"
-
-[[projects]]
-  name = "github.com/gorilla/mux"
-  packages = ["."]
-  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
-  version = "v1.6.1"
-
-[[projects]]
   name = "github.com/graphql-go/graphql"
   packages = [".","gqlerrors","language/ast","language/kinds","language/lexer","language/location","language/parser","language/printer","language/source","language/typeInfo","language/visitor"]
   revision = "1e23489041ba90a66f317fe0deccb236a2fff3cb"
@@ -45,21 +27,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/maxwellhealth/go-dotaccess"
-  packages = ["."]
-  revision = "ae070a2d2a38fd7233e255ded21fb26fe36b4796"
-
-[[projects]]
-  branch = "master"
   name = "github.com/mendsley/gojwk"
   packages = ["."]
   revision = "4d5ec6e58103388d6cb0d7d72bc72649be4f0504"
-
-[[projects]]
-  name = "github.com/oleiade/reflections"
-  packages = ["."]
-  revision = "2b6ec3da648e3e834dc41bad8d9ed7f2dc6a9496"
-  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -98,12 +68,6 @@
   version = "v2.0.1"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/crypto"
-  packages = ["pbkdf2"]
-  revision = "4ec37c66abab2c7e02ae775328b2ff001c3f025a"
-
-[[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
   packages = [".","bson","internal/json","internal/sasl","internal/scram"]
@@ -112,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ade26819929c44f6f84d1b3cbef5fc26239e79aa3d3591cd70fbe112ea1ef47d"
+  inputs-digest = "3dea356e01282e92d679a6a03d3df17b9f2e7de7d18946dd1674ec00817545e4"
   solver-name = "gps-cdcl"
   solver-version = 1

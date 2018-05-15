@@ -16,6 +16,7 @@ import (
 )
 
 func TestNewService(t *testing.T) {
+	t.Parallel()
 	repo := new(mocks.Repository)
 	mockRegistry := new(interfaceMocks.Registry)
 	mockRegistry.On("RegisterService", mock.Anything, mock.AnythingOfType("string")).Return()
@@ -26,6 +27,7 @@ func TestNewService(t *testing.T) {
 }
 
 func TestGetRouteNameFromName(t *testing.T) {
+	t.Parallel()
 	var testCases = []struct {
 		name     string
 		input    string
@@ -50,6 +52,7 @@ func TestGetRouteNameFromName(t *testing.T) {
 }
 
 func TestFindFiltered(t *testing.T) {
+	t.Parallel()
 	mockTeam := &models.Team{}
 	mockTeamList := []*models.Team{mockTeam}
 	var testCases = []struct {
@@ -80,6 +83,7 @@ func TestFindFiltered(t *testing.T) {
 }
 
 func TestCreateTeam(t *testing.T) {
+	t.Parallel()
 	creatorID := bson.NewObjectId()
 	users := []interface{}{creatorID}
 	name, image, description := "name", "image", "description"
@@ -113,6 +117,7 @@ func TestCreateTeam(t *testing.T) {
 }
 
 func TestGetTeamByID(t *testing.T) {
+	t.Parallel()
 	var testCases = []struct {
 		testName  string
 		id        string

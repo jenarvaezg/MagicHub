@@ -3,15 +3,10 @@ package models
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
-	"github.com/go-bongo/bongo"
 	"github.com/zebresel-com/mongodm"
-	"gopkg.in/mgo.v2/bson"
 )
-
-var boxCollection *bongo.Collection
 
 // Status is the status of a box, open or closed
 type Status string
@@ -53,18 +48,15 @@ func (b *Box) AddNote(note Note) error {
 	return b.Save()
 }
 
-// GetBoxByID returns a box searching by id
-func GetBoxByID(id string) (box Box, err error) {
-	if !bson.IsObjectIdHex(id) {
-		return box, fmt.Errorf("%s is not a valid id}", id)
-	}
+// // GetBoxByID returns a box searching by id
+// func GetBoxByID(id string) (box Box, err error) {
+// 	if !bson.IsObjectIdHex(id) {
+// 		return box, fmt.Errorf("%s is not a valid id}", id)
+// 	}
 
-	err = boxCollection.FindById(bson.ObjectIdHex(id), &box)
-	if err != nil {
-		if dnfError, ok := err.(*bongo.DocumentNotFoundError); ok {
-			return box, dnfError
-		}
-		log.Panic("WTF", err.Error())
-	}
-	return
-}
+// 	err = boxCollection.FindById(bson.ObjectIdHex(id), &box)
+// 	if err != nil {
+// 		log.Panic("WTF", err.Error())
+// 	}
+// 	return
+// }
