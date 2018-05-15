@@ -1,7 +1,7 @@
 #!/bin/bash
 
-base_path=`pwd`
-for D in `find ./** -type d | grep -Ev 'vendor|.git|mocks'  ` ; do
+base_path=$(pwd)
+for D in $(find ./** -type d | grep -Ev 'vendor|.git|mocks') ; do
     cd $D
     mockery -all &
     cd $base_path
