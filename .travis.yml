@@ -34,7 +34,7 @@ script:
   - go vet ./...                             # go vet is the official Go static analyzer
   - megacheck ./...                          # "go vet on steroids" + linter
   - golint -set_exit_status $(go list ./...) # one last linter
-  - goveralls -ignore=$MOCK_FILES -service=travis-ci
+  - goveralls -ignore=$MOCK_FILES -service=travis-ci -package=./...
 
 after_success:
   - echo $TRAVIS_BRANCH;
