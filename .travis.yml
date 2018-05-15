@@ -38,6 +38,8 @@ script:
 
 after_success:
   - echo $TRAVIS_BRANCH;
+  - echo $MOCK_FILES
+  - find ./**/
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     ./build_image.sh;
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
