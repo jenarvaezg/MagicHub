@@ -116,7 +116,7 @@ func TestCreateTeam(t *testing.T) {
 	}
 }
 
-func TestGetTeamByID(t *testing.T) {
+func TestFindByID(t *testing.T) {
 	t.Parallel()
 	var testCases = []struct {
 		testName  string
@@ -139,14 +139,11 @@ func TestGetTeamByID(t *testing.T) {
 			r := registry.NewRegistry()
 
 			service := team.NewService(mockRepository, r)
-			result, err := service.GetTeamByID(tc.id)
+			result, err := service.FindByID(tc.id)
 
 			assert.Equal(t, tc.expected, result)
 			assert.Equal(t, tc.err, err)
 			mockRepository.AssertExpectations(t)
-			if !tc.callsRepo {
-				mockRepository.AssertNotCalled(t, "FindByID", mock.AnythingOfType("bson.ObjectId"))
-			}
 		})
 	}
 }
@@ -248,6 +245,7 @@ func TestGetTeamAdmins(t *testing.T) {
 }
 
 func TestOnAllServicesRegistered(t *testing.T) {
+	t.Parallel()
 	mockRepository := new(mocks.Repository)
 	mockTeamService := new(interfaceMocks.TeamService)
 	mockRegistry := new(interfaceMocks.Registry)

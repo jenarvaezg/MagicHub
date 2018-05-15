@@ -125,7 +125,7 @@ func (c *controller) getTeamQuery() *graphql.Field {
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 			id, _ := p.Args["id"].(string)
 
-			return c.service.GetTeamByID(id)
+			return c.service.FindByID(id)
 		},
 	}
 }

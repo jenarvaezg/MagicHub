@@ -94,8 +94,8 @@ func (_m *TeamService) GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([
 	return r0, r1
 }
 
-// GetTeamByID provides a mock function with given fields: id
-func (_m *TeamService) GetTeamByID(id string) (*models.Team, error) {
+// FindByID provides a mock function with given fields: id
+func (_m *TeamService) FindByID(id string) (*models.Team, error) {
 	ret := _m.Called(id)
 
 	var r0 *models.Team

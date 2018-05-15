@@ -33,9 +33,9 @@ func (s *service) FindByEmail(email string) (*models.User, error) {
 	users, err := s.repo.FindBy(map[string]interface{}{"email": email})
 
 	if err != nil {
-		return nil, fmt.Errorf("FindByEmail: %v", err.Error())
+		return nil, fmt.Errorf("find user by email: %v", err.Error())
 	} else if len(users) == 0 {
-		return nil, fmt.Errorf("FindByEmail: User with email %s not found", email)
+		return nil, fmt.Errorf("user with email %s not found", email)
 	}
 	return users[0], nil
 
@@ -46,8 +46,11 @@ func (s *service) CreateUser(username, email, firstName, lastName, imageURL stri
 	user := &models.User{Username: username, Email: email, FirstName: firstName, LastName: lastName, ImageURL: imageURL}
 
 	_, err := s.repo.Store(user)
+	if err != nil {
+		return nil, err
+	}
 
-	return user, err
+	return user, nil
 }
 
 func (s *service) OnAllServicesRegistered(r interfaces.Registry) {

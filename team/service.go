@@ -46,8 +46,8 @@ func (s *service) CreateTeam(creatorID bson.ObjectId, name, image, description s
 	return team, nil
 }
 
-// GetTeamByID returns a team by its ID or error if not found
-func (s *service) GetTeamByID(id string) (*models.Team, error) {
+// FindByID returns a team by its ID or error if not found
+func (s *service) FindByID(id string) (*models.Team, error) {
 	if !bson.IsObjectIdHex(id) {
 		return nil, fmt.Errorf("%s is not a valid ID", id)
 	}

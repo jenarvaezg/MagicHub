@@ -16,7 +16,7 @@ type TeamService interface {
 	GetRouteNameFromName(string) string
 	FindFiltered(limit, offset int, search string) ([]*models.Team, error)
 	CreateTeam(userID bson.ObjectId, name, image, description string) (*models.Team, error)
-	GetTeamByID(id string) (*models.Team, error)
+	FindByID(id string) (*models.Team, error)
 	GetTeamMembers(userID bson.ObjectId, team *models.Team) ([]*models.User, error)
 	GetTeamMembersCount(team *models.Team) (int, error)
 	GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([]*models.User, error)
