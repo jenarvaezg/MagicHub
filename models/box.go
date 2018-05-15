@@ -13,11 +13,14 @@ import (
 
 var boxCollection *bongo.Collection
 
-type status string
+// Status is the status of a box, open or closed
+type Status string
 
 const (
-	statusOpen   = status("open")
-	statusClosed = status("closed")
+	// StatusOpen is the status of an open box
+	StatusOpen = Status("open")
+	// StatusClosed is the status of a closed box
+	StatusClosed = Status("closed")
 )
 
 // Box is a document which holds information about a box
@@ -26,7 +29,7 @@ type Box struct {
 
 	Name     string    `bson:"name"`
 	Notes    []Note    `bson:"notes"`
-	Status   status    `bson:"status"`
+	Status   Status    `bson:"status"`
 	OpenDate time.Time `bson:"openDate"`
 }
 
@@ -37,13 +40,13 @@ func (b *Box) String() string {
 // RefreshStatus updates the box status if conditions are met
 func (b *Box) RefreshStatus() {
 	if time.Now().After(b.OpenDate) {
-		b.Status = statusOpen
+		b.Status = StatusOpen
 	}
 }
 
 // AddNote adds a note to a box
 func (b *Box) AddNote(note Note) error {
-	if b.Status == statusOpen {
+	if b.Status == StatusOpen {
 		return errors.New("Only closed boxes can get new notes")
 	}
 	b.Notes = append(b.Notes, note)

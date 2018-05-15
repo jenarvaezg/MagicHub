@@ -3,11 +3,8 @@ package models
 import (
 	"fmt"
 
-	"github.com/go-bongo/bongo"
 	"github.com/zebresel-com/mongodm"
 )
-
-var userCollection *bongo.Collection
 
 // User is a document which holds information about a user
 type User struct {

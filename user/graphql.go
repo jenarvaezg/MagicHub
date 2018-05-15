@@ -17,6 +17,8 @@ type controller struct {
 func NewGraphQLController(service interfaces.UserService, r interfaces.Registry) interfaces.GraphQLController {
 	c := &controller{service: service}
 	c.types = make(map[string]graphql.Output)
+	c.fields = make(map[string]*graphql.Field)
+
 	c.types["user"] = userType
 
 	r.RegisterController(c, "user")

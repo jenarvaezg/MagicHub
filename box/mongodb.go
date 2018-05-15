@@ -25,8 +25,7 @@ func NewMongoRepository() Repository {
 // FindFiltered returns a list of pointer to boxes from mongodb filtered by limit and offset
 func (r *repo) FindFiltered(limit, offset int, teamID bson.ObjectId) ([]*models.Box, error) {
 	model := r.getModel()
-	var query *mongodm.Query
-	query = utils.QueryLimitAndOffset(limit, offset, model.Find())
+	query := utils.QueryLimitAndOffset(limit, offset, model.Find())
 
 	var boxes []*models.Box
 	err := query.Exec(&boxes)
