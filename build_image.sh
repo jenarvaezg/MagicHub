@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export CGO_ENABLED=0
 export GOOS=linux
 export MAGICHUB_VERSION=$(cat version.txt)
