@@ -1,3 +1,5 @@
 FROM scratch
-ADD magicbox /
-CMD ["/magicbox"]
+LABEL maintainer="jenarvaezg@gmail.com"
+
+COPY MagicHub /
+CMD ["/MagicHub"]

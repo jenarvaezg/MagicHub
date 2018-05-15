@@ -1,7 +1,9 @@
+#!/bin/bash
+
 export CGO_ENABLED=0
 export GOOS=linux
-export MAGICBOX_VERSION=$(cat version.txt)
+export MAGICHUB_VERSION=$(cat version.txt)
 
-go build -a -installsuffix cgo -o magicbox .
-docker build -t jenarvaezg/magicbox:$MAGICBOX_VERSION .
+go build -a -installsuffix cgo -o MagicHub .
+docker build -t jenarvaezg/magichub:$MAGICHUB_VERSION .
 

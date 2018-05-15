@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/jenarvaezg/magicbox/models"
+	"github.com/jenarvaezg/MagicHub/interfaces"
+	"github.com/jenarvaezg/MagicHub/models"
 	"github.com/mendsley/gojwk"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -20,26 +20,14 @@ const (
 	expectedIssuer   = "accounts.google.com"
 )
 
-// GoogleUserProfile is the representation of the profile given by Google
-type GoogleUserProfile struct {
-	ID         string `json:"googleId"`
-	GivenName  string `json:"givenName"`
-	FamilyName string `json:"familyName"`
-	Picture    string `json:"picture"`
-	Email      string `json:"email"`
-	ImageURL   string `json:"imageUrl"`
+type googleToken = string
+
+type googleAuthProvider struct {
+	userService interfaces.UserService
 }
 
-// GoogleToken is the  basic OAuth token with google's jwt
-type GoogleToken struct {
-	oauth2.Token `json:",inline"`
-	JWT          string `json:"id_token"`
-}
-
-// GoogleFrontendRequest is the request sent from frontend to validate google auth
-type GoogleFrontendRequest struct {
-	Token   GoogleToken       `json:"tokenObj"`
-	Profile GoogleUserProfile `json:"profileObj"`
+func newGoogleAuthProvider(userService interfaces.UserService) authProvider {
+	return &googleAuthProvider{userService: userService}
 }
 
 func getGoogleKeys() (keys []*gojwk.Key, err error) {
@@ -57,54 +45,53 @@ func getGoogleKeys() (keys []*gojwk.Key, err error) {
 	return
 }
 
-func parseToken(googleToken GoogleToken) (*jwt.Token, error) {
-	var token *jwt.Token
+func parseToken(googleToken googleToken) (*jwt.Token, error) {
 	keys, err := getGoogleKeys()
 	if err != nil {
 		return &jwt.Token{}, err
 	}
 
-	for _, key := range keys {
-		token, err = jwt.Parse(googleToken.JWT, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+	return jwt.Parse(googleToken, func(token *jwt.Token) (interface{}, error) {
+		var keyToUse *gojwk.Key
+		for _, key := range keys {
+			if key.Kid == token.Header["kid"] {
+				keyToUse = key
+				break
 			}
-			return key.DecodePublicKey()
-		})
-		if err == nil {
-			return token, nil
 		}
-	}
-	return nil, errors.New("No google cert match found")
+
+		if keyToUse == nil {
+			return nil, fmt.Errorf("Didn't find any appropiate key at google for the provided JWT")
+		}
+
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return keyToUse.DecodePublicKey()
+	})
 }
 
-func validateGoogleToken(token GoogleToken) error {
-
-	parsedToken, err := parseToken(token)
+func (p *googleAuthProvider) GetUserFromToken(token string) (*models.User, error) {
+	parsedToken, err := parseToken(googleToken(token))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	claims := parsedToken.Claims.(jwt.MapClaims)
 	if err := claims.Valid(); !claims.VerifyAudience(expectedAudience, true) ||
 		!claims.VerifyIssuer(expectedIssuer, true) || err != nil {
-		return errors.New("Unvalid jwt internals")
+		return nil, errors.New("Unvalid jwt internals")
 	}
 
-	return nil
+	return userFromClaims(claims), nil
 }
 
-func userRequestFromGoogleProfile(profile GoogleUserProfile) models.UserRequest {
-	pass := ""
-	req := models.UserRequest{
-		Username:   strings.Split(profile.Email, "@")[0],
-		Email:      profile.Email,
-		FirstName:  profile.GivenName,
-		LastName:   profile.FamilyName,
-		Password:   &pass,
-		FromGoogle: true,
-		ImageURL:   profile.ImageURL,
+func userFromClaims(claims jwt.MapClaims) *models.User {
+	return &models.User{
+		Username:  strings.Split(claims["email"].(string), "@")[0],
+		Email:     claims["email"].(string),
+		FirstName: claims["given_name"].(string),
+		LastName:  claims["family_name"].(string),
+		ImageURL:  claims["picture"].(string),
 	}
-
-	return req
 }
