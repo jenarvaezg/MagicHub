@@ -22,13 +22,26 @@ func NewMongoRepository() Repository {
 	return &repo{connection}
 }
 
-// FindFiltered returns a list of pointer to boxes from mongodb filtered by limit and offset
-func (r *repo) FindFiltered(limit, offset int, teamID bson.ObjectId) ([]*models.Box, error) {
+// Store saves a box to mongodb and returns its objectID and an error if any
+func (r *repo) Store(b *models.Box) (bson.ObjectId, error) {
 	model := r.getModel()
-	query := utils.QueryLimitAndOffset(limit, offset, model.Find())
+	model.New(b)
+
+	if err := b.Save(); err != nil {
+		return bson.NewObjectId(), err
+	}
+
+	return b.GetId(), b.Populate("Team")
+}
+
+// FindByTeam returns a list of pointers to boxes from mongodb filtered team, limit and offset parameters
+func (r *repo) FindByTeamFiltered(limit, offset int, teamID bson.ObjectId) ([]*models.Box, error) {
+	model := r.getModel()
+	query := model.Find(bson.M{"team": teamID})
+	utils.QueryLimitAndOffset(limit, offset, query)
 
 	var boxes []*models.Box
-	err := query.Exec(&boxes)
+	err := query.Populate("Team").Exec(&boxes)
 
 	return boxes, err
 }

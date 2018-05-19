@@ -1,6 +1,9 @@
 package box
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/graphql-go/graphql"
 
 	"github.com/jenarvaezg/MagicHub/interfaces"
@@ -48,7 +51,7 @@ func (c *controller) GetMutations() graphql.Fields {
 		Args: graphql.FieldConfigArgument{
 			"teamID":   &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.ID), Description: "Team ID for this box"},
 			"name":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String), Description: "Box name"},
-			"openDate": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.Int), Description: "Time when the box will open"},
+			"openDate": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.DateTime), Description: "Time when the box will open"},
 		},
 		Resolve: c.createBox,
 	}
@@ -65,7 +68,11 @@ func (c controller) GetField(name string) *graphql.Field {
 }
 
 func (c *controller) OnAllControllersRegistered(r interfaces.Registry) {
-	// TODO fields stuff
+	teamController := r.GetController("team").(interfaces.GraphQLController)
+
+	boxType.AddFieldConfig("team", &graphql.Field{
+		Type: teamController.GetOutputType("team"), Description: "Box's team", Resolve: c.teamFromBoxResolver,
+	})
 }
 
 func (c *controller) setFields() {
@@ -78,7 +85,8 @@ func (c *controller) boxType() *graphql.Object {
 		Name:        "Box",
 		Description: "A box is a magicbox of MagicHub",
 		Fields: graphql.Fields{
-			"name": &graphql.Field{Type: graphql.String},
+			"name":     &graphql.Field{Type: graphql.String},
+			"openDate": &graphql.Field{Type: graphql.DateTime},
 		},
 	})
 }
@@ -92,16 +100,26 @@ func (c *controller) queryBoxesFromProject(p graphql.ResolveParams) (interface{}
 	var result listResult
 	var err error
 
-	result.Nodes, err = c.service.FindFiltered(limit, offset, team.GetId())
+	result.Nodes, err = c.service.FindByTeamFiltered(limit, offset, team.GetId().Hex())
 	result.TotalCount = len(result.Nodes)
 	return result, err
 }
 
 func (c *controller) createBox(p graphql.ResolveParams) (interface{}, error) {
-	user.RequireUser(p.Context)
-	// name, _ := p.Args["name"].(string)
-	// openDate, _ := p.Args["openDate"].(int)
-	// teamID, _ := p.Args["teamID"].(string)
+	userID := user.RequireUser(p.Context)
+	name, _ := p.Args["name"].(string)
+	teamID, _ := p.Args["teamID"].(string)
+	openDateStr, _ := p.Args["openDate"].(string)
 
-	return nil, nil
+	openDate, err := time.Parse(time.RFC3339, openDateStr)
+	if err != nil {
+		return nil, fmt.Errorf("date is expected in format 2018-05-31T08:00:00.000Z")
+	}
+
+	return c.service.CreateBox(userID, name, teamID, openDate)
+}
+
+func (c *controller) teamFromBoxResolver(p graphql.ResolveParams) (interface{}, error) {
+	box := p.Source.(*models.Box)
+	return box.Team, nil
 }

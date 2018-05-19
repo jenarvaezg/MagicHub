@@ -1,6 +1,8 @@
 package interfaces
 
 import (
+	"time"
+
 	"github.com/jenarvaezg/MagicHub/models"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -39,5 +41,6 @@ type UserService interface {
 // BoxService is a interface of all the methods required to be an interface for Box
 type BoxService interface {
 	Service
-	FindFiltered(limit, offset int, teamID bson.ObjectId) ([]*models.Box, error)
+	FindByTeamFiltered(limit, offset int, teamID string) ([]*models.Box, error)
+	CreateBox(userID bson.ObjectId, name, teamID string, openDateUnix time.Time) (*models.Box, error)
 }

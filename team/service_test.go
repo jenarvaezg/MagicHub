@@ -158,7 +158,7 @@ func TestGetTeamMembers(t *testing.T) {
 
 	var testCases = []struct {
 		testName      string
-		currentUserId bson.ObjectId
+		currentUserID bson.ObjectId
 		expected      []*models.User
 		err           error
 	}{
@@ -172,7 +172,7 @@ func TestGetTeamMembers(t *testing.T) {
 			r := registry.NewRegistry()
 
 			service := team.NewService(mockRepository, r)
-			result, err := service.GetTeamMembers(tc.currentUserId, theTeam)
+			result, err := service.GetTeamMembers(tc.currentUserID, theTeam)
 
 			assert.Equal(t, tc.expected, result)
 			assert.Equal(t, tc.err, err)
