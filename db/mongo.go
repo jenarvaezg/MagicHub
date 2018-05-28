@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/zebresel-com/mongodm"
+	"github.com/jenarvaezg/mongodm"
 )
 
 const (

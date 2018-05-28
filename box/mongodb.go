@@ -1,10 +1,12 @@
 package box
 
 import (
+	"fmt"
+
 	"github.com/jenarvaezg/MagicHub/db"
 	"github.com/jenarvaezg/MagicHub/models"
 	"github.com/jenarvaezg/MagicHub/utils"
-	"github.com/zebresel-com/mongodm"
+	"github.com/jenarvaezg/mongodm"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -24,6 +26,10 @@ func NewMongoRepository() Repository {
 
 // Store saves a box to mongodb and returns its objectID and an error if any
 func (r *repo) Store(b *models.Box) (bson.ObjectId, error) {
+	if t, ok := b.Team.(*models.Team); ok {
+		b.Team = t.GetId()
+	}
+
 	model := r.getModel()
 	model.New(b)
 
@@ -32,6 +38,22 @@ func (r *repo) Store(b *models.Box) (bson.ObjectId, error) {
 	}
 
 	return b.GetId(), b.Populate("Team")
+}
+
+// FindByID returns a box given an ID
+func (r *repo) FindByID(id bson.ObjectId) (*models.Box, error) {
+	model := r.getModel()
+	box := &models.Box{}
+	if err := model.FindId(id).Populate("Team").Exec(box); err != nil {
+		return nil, fmt.Errorf("could not find by id: %v", err)
+	}
+	team := box.Team.(*models.Team)
+
+	if err := team.Populate("Admins", "Members"); err != nil {
+		return nil, fmt.Errorf("could not populate team: %v", err)
+	}
+
+	return box, nil
 }
 
 // FindByTeam returns a list of pointers to boxes from mongodb filtered team, limit and offset parameters

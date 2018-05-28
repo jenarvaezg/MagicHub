@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/zebresel-com/mongodm"
+	"github.com/jenarvaezg/mongodm"
 )
 
 // User is a document which holds information about a user

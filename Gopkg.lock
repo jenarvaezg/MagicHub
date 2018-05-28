@@ -26,6 +26,12 @@
   version = "v0.2.1"
 
 [[projects]]
+  name = "github.com/jenarvaezg/mongodm"
+  packages = ["."]
+  revision = "cbfd0891ca28de93d3abd48626da2fe84f62644f"
+  version = "v2.0.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/mendsley/gojwk"
   packages = ["."]
@@ -62,12 +68,6 @@
   version = "v0.3.0"
 
 [[projects]]
-  name = "github.com/zebresel-com/mongodm"
-  packages = ["."]
-  revision = "cbfd0891ca28de93d3abd48626da2fe84f62644f"
-  version = "v2.0.1"
-
-[[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
   packages = [".","bson","internal/json","internal/sasl","internal/scram"]
@@ -76,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3dea356e01282e92d679a6a03d3df17b9f2e7de7d18946dd1674ec00817545e4"
+  inputs-digest = "b01c2c312a3a136af45f0fd2e73579f4a98c891d951e195e8dc415a2faa773a9"
   solver-name = "gps-cdcl"
   solver-version = 1

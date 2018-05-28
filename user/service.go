@@ -21,11 +21,8 @@ func NewService(repo Repository, r interfaces.Registry) interfaces.UserService {
 }
 
 // FindByID returns a users matching an ID
-func (s *service) FindByID(id string) (*models.User, error) {
-	if !bson.IsObjectIdHex(id) {
-		return nil, fmt.Errorf("%s is not a valid ID", id)
-	}
-	return s.repo.FindByID(bson.ObjectIdHex(id))
+func (s *service) FindByID(id bson.ObjectId) (*models.User, error) {
+	return s.repo.FindByID(id)
 }
 
 // FindByEmail returns a users matching an email

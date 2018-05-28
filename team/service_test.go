@@ -23,7 +23,6 @@ func TestNewService(t *testing.T) {
 
 	s := team.NewService(repo, mockRegistry)
 	mockRegistry.AssertCalled(t, "RegisterService", s, "team")
-
 }
 
 func TestGetRouteNameFromName(t *testing.T) {
@@ -85,7 +84,7 @@ func TestFindFiltered(t *testing.T) {
 func TestCreateTeam(t *testing.T) {
 	t.Parallel()
 	creatorID := bson.NewObjectId()
-	users := []interface{}{creatorID}
+	users := []bson.ObjectId{creatorID}
 	name, image, description := "name", "image", "description"
 	expectedTeamOK := &models.Team{Name: name, Image: image, Description: description, Members: users, Admins: users, RouteName: name}
 	var testCases = []struct {
@@ -120,14 +119,13 @@ func TestFindByID(t *testing.T) {
 	t.Parallel()
 	var testCases = []struct {
 		testName  string
-		id        string
+		id        bson.ObjectId
 		callsRepo bool
 		expected  *models.Team
 		err       error
 	}{
-		{"call ok", bson.NewObjectId().Hex(), true, &models.Team{}, nil},
-		{"bad objectid", "This is a string", false, nil, errors.New("This is a string is not a valid ID")},
-		{"call fails", bson.NewObjectId().Hex(), true, nil, errors.New("fail")},
+		{"call ok", bson.NewObjectId(), true, &models.Team{}, nil},
+		{"call fails", bson.NewObjectId(), true, nil, errors.New("fail")},
 	}
 
 	for _, tc := range testCases {

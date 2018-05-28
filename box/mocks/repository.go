@@ -10,8 +10,31 @@ type Repository struct {
 	mock.Mock
 }
 
-// FindFiltered provides a mock function with given fields: limit, offset, teamID
-func (_m *Repository) FindFiltered(limit int, offset int, teamID bson.ObjectId) ([]*models.Box, error) {
+// FindByID provides a mock function with given fields: id
+func (_m *Repository) FindByID(id bson.ObjectId) (*models.Box, error) {
+	ret := _m.Called(id)
+
+	var r0 *models.Box
+	if rf, ok := ret.Get(0).(func(bson.ObjectId) *models.Box); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Box)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(bson.ObjectId) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FindByTeamFiltered provides a mock function with given fields: limit, offset, teamID
+func (_m *Repository) FindByTeamFiltered(limit int, offset int, teamID bson.ObjectId) ([]*models.Box, error) {
 	ret := _m.Called(limit, offset, teamID)
 
 	var r0 []*models.Box
@@ -26,6 +49,27 @@ func (_m *Repository) FindFiltered(limit int, offset int, teamID bson.ObjectId) 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int, int, bson.ObjectId) error); ok {
 		r1 = rf(limit, offset, teamID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Store provides a mock function with given fields: _a0
+func (_m *Repository) Store(_a0 *models.Box) (bson.ObjectId, error) {
+	ret := _m.Called(_a0)
+
+	var r0 bson.ObjectId
+	if rf, ok := ret.Get(0).(func(*models.Box) bson.ObjectId); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Get(0).(bson.ObjectId)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*models.Box) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}

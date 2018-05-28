@@ -1,10 +1,13 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/graphql-go/graphql"
+	"gopkg.in/mgo.v2/bson"
 
 	"github.com/jenarvaezg/MagicHub/interfaces"
-	"github.com/jenarvaezg/MagicHub/models"
+	"github.com/jenarvaezg/MagicHub/utils"
 )
 
 type controller struct {
@@ -13,13 +16,18 @@ type controller struct {
 	fields  map[string]*graphql.Field
 }
 
+var userType *graphql.Object
+var userByIDQuery *graphql.Field
+
 // NewGraphQLController returns a GraphQLController
 func NewGraphQLController(service interfaces.UserService, r interfaces.Registry) interfaces.GraphQLController {
 	c := &controller{service: service}
 	c.types = make(map[string]graphql.Output)
 	c.fields = make(map[string]*graphql.Field)
+	c.setTypes()
 
 	c.types["user"] = userType
+	c.fields["user"] = userByIDQuery
 
 	r.RegisterController(c, "user")
 	return c
@@ -43,21 +51,25 @@ func (c controller) GetField(name string) *graphql.Field {
 
 func (c *controller) OnAllControllersRegistered(sr interfaces.Registry) {}
 
-var userType = graphql.NewObject(graphql.ObjectConfig{
-	Name:        "User",
-	Description: "A user is an user of MagicHub",
-	Fields: graphql.Fields{
-		"id": &graphql.Field{Type: graphql.String, Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			user := p.Source.(*models.User)
-			return user.GetId().Hex(), nil
-		}},
-		"email":     &graphql.Field{Type: graphql.String},
-		"firstName": &graphql.Field{Type: graphql.String},
-		"lastName":  &graphql.Field{Type: graphql.String},
-		"username":  &graphql.Field{Type: graphql.String},
-		"imageUrl":  &graphql.Field{Type: graphql.String},
-	},
-})
+func (c *controller) setTypes() {
+	userType = c.userType()
+	userByIDQuery = c.getUserQuery()
+}
+
+func (c *controller) userType() *graphql.Object {
+	return graphql.NewObject(graphql.ObjectConfig{
+		Name:        "User",
+		Description: "A user is an user of MagicHub",
+		Fields: graphql.Fields{
+			"id":        &graphql.Field{Type: graphql.String, Resolve: utils.GetIDResolver},
+			"email":     &graphql.Field{Type: graphql.String},
+			"firstName": &graphql.Field{Type: graphql.String},
+			"lastName":  &graphql.Field{Type: graphql.String},
+			"username":  &graphql.Field{Type: graphql.String},
+			"imageUrl":  &graphql.Field{Type: graphql.String},
+		},
+	})
+}
 
 func (c *controller) getUserQuery() *graphql.Field {
 	return &graphql.Field{
@@ -68,7 +80,10 @@ func (c *controller) getUserQuery() *graphql.Field {
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 			RequireUser(p.Context)
 			id := p.Args["id"].(string)
-			return c.service.FindByID(id)
+			if !bson.IsObjectIdHex(id) {
+				return nil, fmt.Errorf("%v is not a valid object id", id)
+			}
+			return c.service.FindByID(bson.ObjectIdHex(id))
 		},
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/jenarvaezg/MagicHub/db"
 	"github.com/jenarvaezg/MagicHub/models"
 	"github.com/jenarvaezg/MagicHub/utils"
-	"github.com/zebresel-com/mongodm"
+	"github.com/jenarvaezg/mongodm"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

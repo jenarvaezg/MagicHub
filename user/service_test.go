@@ -30,21 +30,20 @@ func TestFindByID(t *testing.T) {
 	t.Parallel()
 	var testCases = []struct {
 		testName  string
-		id        string
+		id        bson.ObjectId
 		callsRepo bool
 		expected  *models.User
 		err       error
 	}{
-		{"call ok", bson.NewObjectId().Hex(), true, &models.User{}, nil},
-		{"bad objectid", "This is a string", false, nil, errors.New("This is a string is not a valid ID")},
-		{"call fails", bson.NewObjectId().Hex(), true, nil, errors.New("fail")},
+		{"call ok", bson.NewObjectId(), true, &models.User{}, nil},
+		{"call fails", bson.NewObjectId(), true, nil, errors.New("fail")},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
 			mockRepository := new(mocks.Repository)
 			if tc.callsRepo {
-				mockRepository.On("FindByID", bson.ObjectIdHex(tc.id)).Return(tc.expected, tc.err)
+				mockRepository.On("FindByID", tc.id).Return(tc.expected, tc.err)
 			}
 			r := registry.NewRegistry()
 

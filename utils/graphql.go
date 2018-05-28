@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/graphql-go/graphql"
+	"github.com/jenarvaezg/mongodm"
 )
 
 // MakeListField returns a GraphQL Field that is a list of the listType element with limit and offset args
@@ -42,4 +43,10 @@ func MergeGraphQLFields(grapqhQLFields ...graphql.Fields) graphql.Fields {
 	}
 
 	return mergedFields
+}
+
+// GetIDResolver resolves the ID of a document
+func GetIDResolver(p graphql.ResolveParams) (interface{}, error) {
+	team := p.Source.(mongodm.IDocumentBase)
+	return team.GetId().Hex(), nil
 }

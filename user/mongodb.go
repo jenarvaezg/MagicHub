@@ -1,9 +1,7 @@
 package user
 
 import (
-	"log"
-
-	"github.com/zebresel-com/mongodm"
+	"github.com/jenarvaezg/mongodm"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
@@ -59,7 +57,6 @@ func (r *repo) FindBy(findMap map[string]interface{}) ([]*models.User, error) {
 	model := r.getModel()
 	users := []*models.User{}
 
-	log.Println(findMap)
 	err := model.Find(findMap).Exec(&users)
 
 	return users, err

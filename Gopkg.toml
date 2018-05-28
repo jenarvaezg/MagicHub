@@ -58,7 +58,7 @@
   version = "0.3.0"
 
 [[constraint]]
-  name = "github.com/zebresel-com/mongodm"
+  name = "github.com/jenarvaezg/mongodm"
   version = "2.0.1"
 
 [[constraint]]

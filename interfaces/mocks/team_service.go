@@ -35,11 +35,11 @@ func (_m *TeamService) CreateTeam(userID bson.ObjectId, name string, image strin
 }
 
 // FindByID provides a mock function with given fields: id
-func (_m *TeamService) FindByID(id string) (*models.Team, error) {
+func (_m *TeamService) FindByID(id bson.ObjectId) (*models.Team, error) {
 	ret := _m.Called(id)
 
 	var r0 *models.Team
-	if rf, ok := ret.Get(0).(func(string) *models.Team); ok {
+	if rf, ok := ret.Get(0).(func(bson.ObjectId) *models.Team); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
@@ -48,7 +48,7 @@ func (_m *TeamService) FindByID(id string) (*models.Team, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
+	if rf, ok := ret.Get(1).(func(bson.ObjectId) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)

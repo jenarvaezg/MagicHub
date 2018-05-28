@@ -36,8 +36,8 @@ func (s *service) FindFiltered(limit, offset int, search string) ([]*models.Team
 func (s *service) CreateTeam(creatorID bson.ObjectId, name, image, description string) (*models.Team, error) {
 	team := &models.Team{Name: name, Image: image, Description: description}
 	team.RouteName = s.GetRouteNameFromName(team.Name)
-	team.Members = []interface{}{creatorID}
-	team.Admins = []interface{}{creatorID}
+	team.Members = []bson.ObjectId{creatorID}
+	team.Admins = []bson.ObjectId{creatorID}
 
 	if _, err := s.repo.Store(team); err != nil {
 		return nil, err
@@ -47,11 +47,8 @@ func (s *service) CreateTeam(creatorID bson.ObjectId, name, image, description s
 }
 
 // FindByID returns a team by its ID or error if not found
-func (s *service) FindByID(id string) (*models.Team, error) {
-	if !bson.IsObjectIdHex(id) {
-		return nil, fmt.Errorf("%s is not a valid ID", id)
-	}
-	return s.repo.FindByID(bson.ObjectIdHex(id))
+func (s *service) FindByID(id bson.ObjectId) (*models.Team, error) {
+	return s.repo.FindByID(id)
 }
 
 // GetTeamMembers returns the list of members that belong to a team or an error if the user is not in the team

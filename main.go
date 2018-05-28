@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jenarvaezg/MagicHub/interfaces"
-
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 	"github.com/rs/cors"
@@ -13,6 +11,7 @@ import (
 
 	"github.com/jenarvaezg/MagicHub/auth"
 	"github.com/jenarvaezg/MagicHub/box"
+	"github.com/jenarvaezg/MagicHub/interfaces"
 	"github.com/jenarvaezg/MagicHub/middleware"
 	"github.com/jenarvaezg/MagicHub/registry"
 	"github.com/jenarvaezg/MagicHub/team"

@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 
@@ -44,7 +43,6 @@ func (l *UserFromJWTMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	u, err := auth.GetUserFromToken(token)
 	if err != nil {
-		log.Println(u, err)
 		next(w, r)
 		return
 	}

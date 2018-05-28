@@ -1,6 +1,6 @@
 package utils
 
-import "github.com/zebresel-com/mongodm"
+import "github.com/jenarvaezg/mongodm"
 
 // QueryLimitAndOffset Receives limit, offset and a mongodb query, returns the mondodm query, ready to be executed
 func QueryLimitAndOffset(limit, offset int, query *mongodm.Query) *mongodm.Query {

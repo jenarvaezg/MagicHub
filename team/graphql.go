@@ -1,13 +1,14 @@
 package team
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/graphql-go/graphql"
 	"github.com/jenarvaezg/MagicHub/interfaces"
 	"github.com/jenarvaezg/MagicHub/models"
 	"github.com/jenarvaezg/MagicHub/user"
 	"github.com/jenarvaezg/MagicHub/utils"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type listResult struct {
@@ -91,7 +92,6 @@ func (c *controller) OnAllControllersRegistered(r interfaces.Registry) {
 		},
 	})
 
-	log.Println(boxListField)
 	teamType.AddFieldConfig("boxes", boxListField)
 
 }
@@ -125,7 +125,10 @@ func (c *controller) getTeamQuery() *graphql.Field {
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 			id, _ := p.Args["id"].(string)
 
-			return c.service.FindByID(id)
+			if !bson.IsObjectIdHex(id) {
+				return nil, fmt.Errorf("%v is not a valid object id", id)
+			}
+			return c.service.FindByID(bson.ObjectIdHex(id))
 		},
 	}
 }
@@ -144,10 +147,7 @@ func (c *controller) teamType() *graphql.Object {
 		Name:        "Team",
 		Description: "A team is the base organizational level, holds stuff like users, boxes, etc...",
 		Fields: graphql.Fields{
-			"id": &graphql.Field{Type: graphql.String, Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				team := p.Source.(*models.Team)
-				return team.GetId().Hex(), nil
-			}},
+			"id":          &graphql.Field{Type: graphql.String, Resolve: utils.GetIDResolver},
 			"name":        &graphql.Field{Type: graphql.String},
 			"image":       &graphql.Field{Type: graphql.String},
 			"routeName":   &graphql.Field{Type: graphql.String},
