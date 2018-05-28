@@ -18,6 +18,9 @@ type Team struct {
 
 // IsUserMember resturn a boolean that determines wheter a userID is in the team members list
 func (t Team) IsUserMember(userID bson.ObjectId) bool {
+	if len(t.Members.([]*User)) == 0 {
+		return false
+	}
 	for _, m := range t.Members.([]*User) {
 		if userID == m.GetId() {
 			return true

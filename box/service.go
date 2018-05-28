@@ -55,9 +55,8 @@ func (s *service) InsertNote(userID, boxID bson.ObjectId, text string) (*models.
 		return nil, err
 	}
 
-	team := box.Team.(*models.Team)
-	if team.IsUserMember(userID) {
-		return nil, fmt.Errorf("you are not in the team %s so you can't add notes to the box", team.GetId())
+	if team := box.Team.(*models.Team); !team.IsUserMember(userID) {
+		return nil, fmt.Errorf("you are not in the team %s so you can't add notes", team.GetId())
 	}
 
 	if err := box.AddNote(models.Note{Text: text, From: userID}); err != nil {

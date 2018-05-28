@@ -2,7 +2,6 @@ package registry
 
 import (
 	"log"
-	"sync"
 
 	"github.com/jenarvaezg/MagicHub/interfaces"
 )
@@ -47,29 +46,15 @@ func (r *registry) GetController(name string) interfaces.Controller {
 }
 
 func (r *registry) AllServicesRegistered() {
-	log.Println("All services ready!", r.services)
-	var wg sync.WaitGroup
-	wg.Add(len(r.services))
-	for _, service := range r.services {
-		go func(s interfaces.Service) {
-			s.OnAllServicesRegistered(r)
-			wg.Done()
-		}(service)
+	for _, s := range r.services {
+		s.OnAllServicesRegistered(r)
 	}
-	wg.Wait()
-	log.Println("All services done doing their thing")
+	log.Println("All services ready")
 }
 
 func (r *registry) AllControllersRegistered() {
-	log.Println("All controllers ready!", r.controllers)
-	var wg sync.WaitGroup
-	wg.Add(len(r.controllers))
-	for _, controller := range r.controllers {
-		go func(c interfaces.Controller) {
-			c.OnAllControllersRegistered(r)
-			wg.Done()
-		}(controller)
+	for _, c := range r.controllers {
+		c.OnAllControllersRegistered(r)
 	}
-	wg.Wait()
-	log.Println("All controlers done doing their thing")
+	log.Println("All controllers ready")
 }

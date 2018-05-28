@@ -33,7 +33,7 @@ func (b *Box) IsOpen() bool {
 // AddNote adds a note to a box
 func (b *Box) AddNote(note Note) error {
 	if b.IsOpen() {
-		return errors.New("Only closed boxes can get new notes")
+		return errors.New("can't add note because box is open")
 	}
 	b.Notes = append(b.Notes, &note)
 	return nil
