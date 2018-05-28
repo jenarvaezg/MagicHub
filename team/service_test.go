@@ -2,6 +2,7 @@ package team_test
 
 import (
 	"errors"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -242,13 +243,128 @@ func TestGetTeamAdmins(t *testing.T) {
 	}
 }
 
+func TestRequestTeamInvite(t *testing.T) {
+	userID := bson.NewObjectId()
+	user := &models.User{}
+	user.SetId(userID)
+	emptyTeam := func() *models.Team {
+		return &models.Team{Members: []*models.User{}, JoinRequests: []*models.User{}}
+	}
+	teamWithUser := func() *models.Team {
+		return &models.Team{Members: []*models.User{user}}
+	}
+	teamWithRequest := func() *models.Team {
+		return &models.Team{Members: []*models.User{}, JoinRequests: []*models.User{user}}
+	}
+	var testCases = []struct {
+		testName     string
+		team         *models.Team
+		getTeamError error
+		getUserError error
+		storeError   error
+		expected     *models.Team
+		err          error
+	}{
+		{"Team not found", emptyTeam(), errors.New("fail"), nil, nil, nil, errors.New("could not get team: fail")},
+		{"User in member list", teamWithUser(), nil, nil, nil, nil, errors.New("you are already in the team")},
+		{"User not found", emptyTeam(), nil, errors.New("fail"), nil, nil, errors.New("could not fetch user: fail")},
+		{"User already requested", teamWithRequest(), nil, nil, nil, nil, errors.New("could not add invite request: user already requested to join")},
+		{"Store call fails", emptyTeam(), nil, nil, errors.New("fail"), nil, errors.New("could not save team: fail")},
+		{"Everything OK", emptyTeam(), nil, nil, nil, teamWithRequest(), nil},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			mockRepository := new(mocks.Repository)
+			mockUserService := new(interfaceMocks.UserService)
+			mockUserService.On("OnAllServicesRegistered", mock.Anything)
+			mockRepository.On("FindByID", tc.team.GetId()).Return(tc.team, tc.getTeamError)
+			if tc.getTeamError == nil {
+				mockUserService.On("FindByID", user.GetId()).Return(user, tc.getUserError)
+				mockRepository.On("Store", tc.team).Return(tc.team.GetId(), tc.storeError)
+			}
+			r := registry.NewRegistry()
+			r.RegisterService(mockUserService, "user")
+
+			service := team.NewService(mockRepository, r)
+			r.AllServicesRegistered()
+			result, err := service.RequestTeamInvite(user.GetId(), tc.team.GetId())
+			log.Println(tc.testName, tc.team.JoinRequests)
+
+			assert.Equal(t, tc.expected, result)
+			assert.Equal(t, tc.err, err)
+
+		})
+	}
+
+}
+
+func TestAcceptInviteRequest(t *testing.T) {
+	userID, requesterID := bson.NewObjectId(), bson.NewObjectId()
+	user, requester := &models.User{}, &models.User{}
+	user.SetId(userID)
+	requester.SetId(requesterID)
+
+	emptyTeam := func() *models.Team {
+		return &models.Team{Members: []*models.User{}, Admins: []*models.User{}, JoinRequests: []*models.User{}}
+	}
+	teamWithUser := func() *models.Team {
+		return &models.Team{Members: []*models.User{user}, Admins: []*models.User{user}, JoinRequests: []*models.User{}}
+	}
+	teamWithRequest := func() *models.Team {
+		return &models.Team{Members: []*models.User{user}, Admins: []*models.User{user}, JoinRequests: []*models.User{requester}}
+	}
+	teamWithUserAndRequester := func() *models.Team {
+		return &models.Team{Members: []*models.User{user, requester}, Admins: []*models.User{user}, JoinRequests: []*models.User{}}
+	}
+
+	_, _ = teamWithUser(), teamWithRequest()
+	var testCases = []struct {
+		testName     string
+		team         *models.Team
+		getTeamError error
+		getUserError error
+		storeError   error
+		expected     *models.Team
+		err          error
+	}{
+		{"Team not found", emptyTeam(), errors.New("fail"), nil, nil, nil, errors.New("could not get team: fail")},
+		{"User not admin", emptyTeam(), nil, nil, nil, nil, errors.New("you are not an admin of the team")},
+		{"User not found", teamWithUser(), nil, errors.New("fail"), nil, nil, errors.New("could not fetch user: fail")},
+		{"User did not request", teamWithUser(), nil, nil, nil, nil, errors.New("could not add invite request: user is not in the join request list")},
+		{"Store call fails", teamWithRequest(), nil, nil, errors.New("fail"), nil, errors.New("could not save team: fail")},
+		{"Everything OK", teamWithRequest(), nil, nil, nil, teamWithUserAndRequester(), nil},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			mockRepository := new(mocks.Repository)
+			mockUserService := new(interfaceMocks.UserService)
+			mockUserService.On("OnAllServicesRegistered", mock.Anything)
+			mockRepository.On("FindByID", tc.team.GetId()).Return(tc.team, tc.getTeamError)
+			if tc.getTeamError == nil {
+				mockUserService.On("FindByID", requester.GetId()).Return(requester, tc.getUserError)
+				mockRepository.On("Store", tc.team).Return(tc.team.GetId(), tc.storeError)
+			}
+			r := registry.NewRegistry()
+			r.RegisterService(mockUserService, "user")
+
+			service := team.NewService(mockRepository, r)
+			r.AllServicesRegistered()
+			result, err := service.AcceptInviteRequest(user.GetId(), requester.GetId(), tc.team.GetId())
+
+			assert.Equal(t, tc.expected, result)
+			assert.Equal(t, tc.err, err)
+
+		})
+	}
+
+}
 func TestOnAllServicesRegistered(t *testing.T) {
 	t.Parallel()
 	mockRepository := new(mocks.Repository)
-	mockTeamService := new(interfaceMocks.TeamService)
+	mockUserService := new(interfaceMocks.UserService)
 	mockRegistry := new(interfaceMocks.Registry)
 	mockRegistry.On("RegisterService", mock.Anything, "team")
-	mockRegistry.On("GetService", "team").Return(mockTeamService)
+	mockRegistry.On("GetService", "user").Return(mockUserService)
 
 	service := team.NewService(mockRepository, mockRegistry)
 	service.OnAllServicesRegistered(mockRegistry)

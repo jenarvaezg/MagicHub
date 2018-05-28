@@ -11,6 +11,29 @@ type TeamService struct {
 	mock.Mock
 }
 
+// AcceptInviteRequest provides a mock function with given fields: userID, requesterID, teamID
+func (_m *TeamService) AcceptInviteRequest(userID bson.ObjectId, requesterID bson.ObjectId, teamID bson.ObjectId) (*models.Team, error) {
+	ret := _m.Called(userID, requesterID, teamID)
+
+	var r0 *models.Team
+	if rf, ok := ret.Get(0).(func(bson.ObjectId, bson.ObjectId, bson.ObjectId) *models.Team); ok {
+		r0 = rf(userID, requesterID, teamID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Team)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(bson.ObjectId, bson.ObjectId, bson.ObjectId) error); ok {
+		r1 = rf(userID, requesterID, teamID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateTeam provides a mock function with given fields: userID, name, image, description
 func (_m *TeamService) CreateTeam(userID bson.ObjectId, name string, image string, description string) (*models.Team, error) {
 	ret := _m.Called(userID, name, image, description)
@@ -164,4 +187,27 @@ func (_m *TeamService) GetTeamMembersCount(team *models.Team) (int, error) {
 // OnAllServicesRegistered provides a mock function with given fields: r
 func (_m *TeamService) OnAllServicesRegistered(r interfaces.Registry) {
 	_m.Called(r)
+}
+
+// RequestTeamInvite provides a mock function with given fields: userID, teamID
+func (_m *TeamService) RequestTeamInvite(userID bson.ObjectId, teamID bson.ObjectId) (*models.Team, error) {
+	ret := _m.Called(userID, teamID)
+
+	var r0 *models.Team
+	if rf, ok := ret.Get(0).(func(bson.ObjectId, bson.ObjectId) *models.Team); ok {
+		r0 = rf(userID, teamID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Team)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(bson.ObjectId, bson.ObjectId) error); ok {
+		r1 = rf(userID, teamID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

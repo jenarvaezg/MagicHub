@@ -22,6 +22,8 @@ type TeamService interface {
 	GetTeamMembers(userID bson.ObjectId, team *models.Team) ([]*models.User, error)
 	GetTeamMembersCount(team *models.Team) (int, error)
 	GetTeamAdmins(userID bson.ObjectId, team *models.Team) ([]*models.User, error)
+	RequestTeamInvite(userID, teamID bson.ObjectId) (*models.Team, error)
+	AcceptInviteRequest(userID, requesterID, teamID bson.ObjectId) (*models.Team, error)
 }
 
 // AuthService is a interface of all the methods required to be an interface for Auth

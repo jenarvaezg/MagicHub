@@ -62,7 +62,7 @@ func TestFindByTeamFiltered(t *testing.T) {
 }
 
 func TestCreateBox(t *testing.T) {
-	//t.Parallel()
+	t.Parallel()
 	userID, teamID, boxName, openDate := bson.NewObjectId(), bson.NewObjectId(), "box", time.Now()
 	user := &models.User{}
 	user.SetId(userID)

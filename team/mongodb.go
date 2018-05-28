@@ -43,7 +43,7 @@ func (r *repo) Store(t *models.Team) (bson.ObjectId, error) {
 
 	}
 
-	return t.GetId(), t.Populate("Admins", "Members")
+	return t.GetId(), t.Populate("Admins", "Members", "JoinRequests")
 }
 
 // FindFiltered returns a list of pointer to teams from mongodb filtered by limit offset and search parameter
@@ -62,7 +62,7 @@ func (r *repo) FindFiltered(limit, offset int, search string) ([]*models.Team, e
 	var teams []*models.Team
 
 	// Run the query
-	err := query.Populate("Admins", "Members").Exec(&teams)
+	err := query.Populate("Admins", "Members", "JoinRequests").Exec(&teams)
 
 	return teams, err
 }
@@ -72,7 +72,7 @@ func (r *repo) FindByID(id bson.ObjectId) (*models.Team, error) {
 	model := r.getModel()
 	team := &models.Team{}
 
-	if err := model.FindId(id).Populate("Admins", "Members").Exec(team); err != nil {
+	if err := model.FindId(id).Populate("Admins", "Members", "JoinRequests").Exec(team); err != nil {
 		return nil, err
 	}
 

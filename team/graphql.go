@@ -53,10 +53,27 @@ func (c *controller) GetMutations() graphql.Fields {
 			"image":       &graphql.ArgumentConfig{Type: graphql.String, Description: "Path to image of team"},
 			"description": &graphql.ArgumentConfig{Type: graphql.String, Description: "Short description of team"},
 		},
-		Resolve: c.createTeamResolver,
+		Resolve: c.createTeamMutation,
 	}
 
-	return graphql.Fields{"createTeam": createTeamMutation}
+	var requestTeamInvite = &graphql.Field{
+		Type: teamType,
+		Args: graphql.FieldConfigArgument{
+			"teamID": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String), Description: "Team name"},
+		},
+		Resolve: c.requestTeamInviteMutation,
+	}
+
+	var acceptInviteRequest = &graphql.Field{
+		Type: teamType,
+		Args: graphql.FieldConfigArgument{
+			"teamID":      &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String), Description: "Team name"},
+			"requesterID": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.ID), Description: "Requester ID"},
+		},
+		Resolve: c.acceptInviteRequestMutation,
+	}
+
+	return graphql.Fields{"createTeam": createTeamMutation, "requestTeamInvite": requestTeamInvite, "acceptInviteRequest": acceptInviteRequest}
 }
 
 func (c *controller) GetField(name string) *graphql.Field {
@@ -99,6 +116,7 @@ func (c *controller) OnAllControllersRegistered(r interfaces.Registry) {
 func (c *controller) setTypes() {
 	teamType = c.teamType()
 	teamByIDQuery = c.getTeamQuery()
+
 	teamListQuery = utils.MakeListField(utils.MakeNodeListType("TeamList", teamType), c.teamListQuery, true)
 }
 
@@ -133,13 +151,39 @@ func (c *controller) getTeamQuery() *graphql.Field {
 	}
 }
 
-func (c *controller) createTeamResolver(p graphql.ResolveParams) (interface{}, error) {
+func (c *controller) createTeamMutation(p graphql.ResolveParams) (interface{}, error) {
 	userID := user.RequireUser(p.Context)
 	name, _ := p.Args["name"].(string)
 	image, _ := p.Args["image"].(string)
 	description, _ := p.Args["description"].(string)
 
 	return c.service.CreateTeam(userID, name, image, description)
+}
+
+func (c *controller) requestTeamInviteMutation(p graphql.ResolveParams) (interface{}, error) {
+	userID := user.RequireUser(p.Context)
+	id, _ := p.Args["teamID"].(string)
+
+	if !bson.IsObjectIdHex(id) {
+		return nil, fmt.Errorf("%v is not a valid object id", id)
+	}
+
+	return c.service.RequestTeamInvite(userID, bson.ObjectIdHex(id))
+}
+
+func (c *controller) acceptInviteRequestMutation(p graphql.ResolveParams) (interface{}, error) {
+	userID := user.RequireUser(p.Context)
+	requesterID, _ := p.Args["requesterID"].(string)
+	teamID, _ := p.Args["teamID"].(string)
+
+	if !bson.IsObjectIdHex(requesterID) {
+		return nil, fmt.Errorf("%v is not a valid object id", requesterID)
+	}
+	if !bson.IsObjectIdHex(teamID) {
+		return nil, fmt.Errorf("%v is not a valid object id", teamID)
+	}
+
+	return c.service.AcceptInviteRequest(userID, bson.ObjectIdHex(requesterID), bson.ObjectIdHex(teamID))
 }
 
 func (c *controller) teamType() *graphql.Object {
